@@ -1,6 +1,8 @@
 using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 
+namespace SciDevOOP.Functionals;
+
 class MyFunctional : IFunctional
 {
     public List<(double x, double y)> points;

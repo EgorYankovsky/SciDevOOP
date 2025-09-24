@@ -3,6 +3,8 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.Interfaces;
 
+namespace SciDevOOP.Optimizators;
+
 class MinimizerMonteCarlo : IOptimizator
 {
     public int MaxIter = 100000;

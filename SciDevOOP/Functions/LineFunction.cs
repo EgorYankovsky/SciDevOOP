@@ -1,6 +1,8 @@
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
+namespace SciDevOOP.Functions;
+
 class LineFunction : IParametricFunction
 {
     class InternalLineFunction : IFunction
