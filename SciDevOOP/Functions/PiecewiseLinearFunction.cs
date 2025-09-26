@@ -3,7 +3,7 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
 namespace SciDevOOP.Functions;
 
-public class PiecewiseLinearFunction : IParametricFunction
+class PiecewiseLinearFunction : IParametricFunction
 {
 
     //         /
@@ -17,9 +17,12 @@ public class PiecewiseLinearFunction : IParametricFunction
     // fi(x) = ai * x + bi
     class InternalPiecewiseLinearFunction : IDifferentiableFunction
     {
-        public IVector? delimiters; // x0, x1, ... xn_1.
-        public IVector? a; // a0, a1, ... an;
-        public IVector? b; // b0, b1, ... bn;
+        public IVector? x;
+        public IVector? y;
+
+        //public IVector? delimiters; // x0, x1, ... xn_1.
+        //public IVector? a; // a0, a1, ... an;
+        //public IVector? b; // b0, b1, ... bn;
 
         IVector IDifferentiableFunction.Gradient(IVector point)
         {
@@ -34,37 +37,54 @@ public class PiecewiseLinearFunction : IParametricFunction
         double IFunction.Value(IVector point)
         {
             var indexLeft = 0;
-            var indexRight = a!.Count - 1;
+            var indexRight = x!.Count - 1;
             while (indexLeft <= indexRight)
             {
                 var middleIndex = (indexLeft + indexRight) / 2;
-                if (point[0] == delimiters![middleIndex])
+                if (point[0] == x![middleIndex])
                 {
                     indexLeft = middleIndex;
                     break;
                 }
-                else if (point[0] < delimiters[middleIndex])
+                else if (point[0] < x[middleIndex])
                     indexRight = middleIndex - 1;
-                else if (point[0] > delimiters[middleIndex])
+                else if (point[0] > x[middleIndex])
                     indexLeft = middleIndex + 1;
             }
-            return a[indexLeft] * point[0] + b![indexLeft];
+            var x0 = x![indexLeft];
+            var y0 = y![indexLeft];
+            
+            var x1 = x![indexLeft + 1];
+            var y1 = y![indexLeft + 1];
+
+            var a = (y1 - y0) / (x1 - x0);
+            var b = y0 - a * x0;
+
+            return a * point[0] + b;
         }
     }
 
     /// <summary>
     /// Method, that binds parameters to function. Must be successfully tested!
     /// </summary>
-    /// <param name="parameters">parameters = [x0, x1, ... xn_1, a0, a1, ... an, b0, b1, ... bn]</param>
+    /// <param name="parameters">parameters = [x0, x1, ... xn, y0, y1, ... yn]</param>
     /// <returns>Generated InternalPiecewiseLinearFunction class.</returns>
-    IFunction IParametricFunction.Bind(IVector parameters)
+    public IFunction Bind(IVector parameters)
     {
-        var n = (parameters.Count + 1) / 3;
+        var n = parameters.Count / 2;
+
+        // Better to improve with LINQ.
+        var _x = new Vector();
+        for (var i = 0; i < n; ++i) _x.Add(parameters[i]);
+
+        var _y = new Vector();
+        for (var i = n; i < 2 * n; ++i) _y.Add(parameters[i]);
+
+
         return new InternalPiecewiseLinearFunction()
         {
-            delimiters = (IVector)parameters.Take(n - 1),
-            a = (IVector)parameters.Skip(n - 1).Take(n),
-            b = (IVector)parameters.Skip(2 * n - 1).Take(n),
+            x = _x,
+            y = _y,
         };
     }
 }

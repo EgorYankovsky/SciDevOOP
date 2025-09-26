@@ -3,8 +3,12 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
 namespace SciDevOOP.Functions;
 
-public class LineFunctionN : IParametricFunction
+class LineFunctionN : IParametricFunction
 {
+    /// <summary>
+    /// Represents a line function at N dimension of the form:
+    /// F = c0 + c1*x1 + c2*x2 + ... + cn*xn = 0.
+    /// </summary>
     class InternalLineFunctionN : IDifferentiableFunction
     {
         public IVector? coefficients;
@@ -25,6 +29,6 @@ public class LineFunctionN : IParametricFunction
         }
     }
 
-    IFunction IParametricFunction.Bind(IVector parameters)
+    public IFunction Bind(IVector parameters)
         => new InternalLineFunctionN() { coefficients = parameters };
 }

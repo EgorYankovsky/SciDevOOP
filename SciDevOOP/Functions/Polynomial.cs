@@ -3,7 +3,7 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
 namespace SciDevOOP.Functions;
 
-public class Polynomial : IParametricFunction
+class Polynomial : IParametricFunction
 {
     /// <summary>
     /// Represents a polynomial function of the form:
@@ -26,7 +26,7 @@ public class Polynomial : IParametricFunction
         }
     }
 
-    IFunction IParametricFunction.Bind(IVector parameters)
+    public IFunction Bind(IVector parameters)
         => new InternalPolynomial() { coefficients = parameters };
 
 }
