@@ -3,15 +3,28 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
 namespace SciDevOOP.Functions;
 
-public class LineFunctionN : IDifferentiableFunction
+public class LineFunctionN : IParametricFunction
 {
-    IVector IDifferentiableFunction.Gradient(IVector point)
+    class InternalLineFunctionN : IDifferentiableFunction
     {
-        throw new NotImplementedException();
+        public IVector? coefficients;
+
+        IVector IDifferentiableFunction.Gradient(IVector point)
+        {
+            throw new NotImplementedException();
+        }
+        
+        double IFunction.Value(IVector point)
+        {
+            if (point.Count != coefficients?.Count)
+                throw new ArgumentException("Points dimension isn't equal to coefficients.");
+            double sum = 0;
+            foreach (var (p, c) in point.Zip(coefficients!))
+                sum += p * c;
+            return sum;
+        }
     }
 
-    double IFunction.Value(IVector point)
-    {
-        throw new NotImplementedException();
-    }
+    IFunction IParametricFunction.Bind(IVector parameters)
+        => new InternalLineFunctionN() { coefficients = parameters };
 }

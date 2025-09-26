@@ -1,9 +1,9 @@
 using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
-using SciDevOOP.Interfaces;
+using SciDevOOP.ImmutableInterfaces;
 
-namespace SciDevOOP.Functionals;
+namespace SciDevOOP.Optimizators;
 
 public class MinimizerLevenbergMarquardt : IOptimizator
 {

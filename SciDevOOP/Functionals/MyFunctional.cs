@@ -9,11 +9,10 @@ class MyFunctional : IFunctional
     public double Value(IFunction function)
     {
         double sum = 0;
-        foreach (var point in points)
+        foreach (var (x, y) in points)
         {
-            var param = new Vector();
-            param.Add(point.x);
-            var s = function.Value(param) - point.y;
+            var param = new Vector() { x };
+            var s = function.Value(param) - y;
             sum += s * s;
         }
         return sum;
