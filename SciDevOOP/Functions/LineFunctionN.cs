@@ -1,5 +1,6 @@
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
+using SciDevOOP.MathematicalObjects;
 
 namespace SciDevOOP.Functions;
 
@@ -14,16 +15,14 @@ class LineFunctionN : IParametricFunction
         public IVector? coefficients;
 
         IVector IDifferentiableFunction.Gradient(IVector point)
-        {
-            throw new NotImplementedException();
-        }
-        
+            => (Vector)coefficients!.Skip(1).ToList();
+
         double IFunction.Value(IVector point)
         {
-            if (point.Count != coefficients?.Count)
+            if (point.Count != coefficients?.Count - 1)
                 throw new ArgumentException("Points dimension isn't equal to coefficients.");
-            double sum = 0;
-            foreach (var (p, c) in point.Zip(coefficients!))
+            var sum = coefficients[0];
+            foreach (var (p, c) in point.Zip(coefficients.Skip(1)!))
                 sum += p * c;
             return sum;
         }

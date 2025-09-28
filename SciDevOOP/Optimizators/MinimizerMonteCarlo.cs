@@ -2,6 +2,7 @@ using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
+using SciDevOOP.MathematicalObjects;
 
 namespace SciDevOOP.Optimizators;
 

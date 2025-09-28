@@ -1,40 +1,36 @@
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
+using SciDevOOP.MathematicalObjects;
 
 namespace SciDevOOP.Functions;
 
 class PiecewiseLinearFunction : IParametricFunction
 {
-
-    //         /
-    //         | f0(x) x < x0
-    //         | f1(x) x0 <= x < x1
-    // f(x) = <  f2(x) x1 <= x < x2
-    //         | ...
-    //         | fn(x) x >= xn_1
-    //         \
-    //
-    // fi(x) = ai * x + bi
+    /// <summary>
+    /// Represents a piecewise linear function of the form:
+    ///         /
+    ///         | f0(x) x < x0
+    ///         | f1(x) x0 <= x < x1
+    /// f(x) = <  f2(x) x1 <= x < x2
+    ///         | ...
+    ///         | fn(x) x >= xn_1
+    ///         \
+    /// where
+    /// fi(x) => ai * x + bi * y = c
+    /// </summary>
     class InternalPiecewiseLinearFunction : IDifferentiableFunction
     {
-        public IVector? x;
-        public IVector? y;
-
-        //public IVector? delimiters; // x0, x1, ... xn_1.
-        //public IVector? a; // a0, a1, ... an;
-        //public IVector? b; // b0, b1, ... bn;
-
-        IVector IDifferentiableFunction.Gradient(IVector point)
-        {
-            throw new NotImplementedException();
-        }
+        public IVector? x; // x0, x1, ... xn_1.
+        public IVector? a; // a0, a1, ... an;
+        public IVector? b; // b0, b1, ... bn;
+        public IVector? c; // b0, b1, ... bn;
 
         /// <summary>
-        /// Functions, that calculates f(x). Binary search must be successfully tested!
+        /// Method, that finds index of linear function according to point.
         /// </summary>
-        /// <param name="point">Point where calculation is necessary.</param>
-        /// <returns>Calculated value.</returns>
-        double IFunction.Value(IVector point)
+        /// <param name="point">Point to search.</param>
+        /// <returns>Index of linear function.</returns>
+        private int FindPiecewiseIndex(IVector point)
         {
             var indexLeft = 0;
             var indexRight = x!.Count - 1;
@@ -51,40 +47,71 @@ class PiecewiseLinearFunction : IParametricFunction
                 else if (point[0] > x[middleIndex])
                     indexLeft = middleIndex + 1;
             }
-            var x0 = x![indexLeft];
-            var y0 = y![indexLeft];
-            
-            var x1 = x![indexLeft + 1];
-            var y1 = y![indexLeft + 1];
-
-            var a = (y1 - y0) / (x1 - x0);
-            var b = y0 - a * x0;
-
-            return a * point[0] + b;
+            return indexLeft;
         }
+
+        IVector IDifferentiableFunction.Gradient(IVector point)
+        {
+            if (x is null) throw new Exception("Vector x is null at InternalPiecewiseLinearFunction.Gradient.");
+            if (a is null) throw new Exception("Vector a is null at InternalPiecewiseLinearFunction.Gradient.");
+            if (b is null) throw new Exception("Vector b is null at InternalPiecewiseLinearFunction.Gradient.");
+            if (c is null) throw new Exception("Vector c is null at InternalPiecewiseLinearFunction.Gradient.");
+            var index = FindPiecewiseIndex(point);
+            return new Vector { a[index], b[index] }; ;
+        }
+
+        /// <summary>
+        /// Functions, that calculates f(x). Binary search must be successfully tested!
+        /// </summary>
+        /// <param name="point">Point where calculation is necessary.</param>
+        /// <returns>Calculated value.</returns>
+        double IFunction.Value(IVector point)
+        {
+            if (x is null) throw new Exception("Vector x is null at InternalPiecewiseLinearFunction.Value.");
+            if (a is null) throw new Exception("Vector a is null at InternalPiecewiseLinearFunction.Value.");
+            if (b is null) throw new Exception("Vector b is null at InternalPiecewiseLinearFunction.Value.");
+            if (c is null) throw new Exception("Vector c is null at InternalPiecewiseLinearFunction.Value.");
+            var index = FindPiecewiseIndex(point);
+            return -1.0 / b[index] * (a[index] * point[0] - c[index]);
+        }
+    }
+
+    private void CheckParameters(IVector parameters, int n)
+    {
+        for (var i = 0; i < n; ++i)
+        {
+            var zeros = 0;
+            if (parameters[n - 1 + i] == 0) zeros++;
+            if (parameters[2 * n - 1 + i] == 0) zeros++;
+            if (parameters[3 * n - 1 + i] == 0) zeros++;
+            if (zeros > 1)
+            {
+                var leftX = i == 0 ? "-inf" : parameters[i - 1].ToString();
+                var rightX = i == n - 1 ? "inf" : parameters[i].ToString();
+                var a = parameters[n - 1 + i];
+                var b = parameters[2 * n - 1 + i];
+                var c = parameters[3 * n - 1 + i];
+                throw new ArgumentException($"Incorrect input data for x in ({leftX}; {rightX}): a = {a}, b = {b}, c = {c}.");
+            }
+        }
+
     }
 
     /// <summary>
     /// Method, that binds parameters to function. Must be successfully tested!
     /// </summary>
-    /// <param name="parameters">parameters = [x0, x1, ... xn, y0, y1, ... yn]</param>
+    /// <param name="parameters">parameters = [x0, x1, ... xn_1, a0, a1, ... an, b0, b1, ... bn, c0, c1, ... cn]</param>
     /// <returns>Generated InternalPiecewiseLinearFunction class.</returns>
     public IFunction Bind(IVector parameters)
     {
-        var n = parameters.Count / 2;
-
-        // Better to improve with LINQ.
-        var _x = new Vector();
-        for (var i = 0; i < n; ++i) _x.Add(parameters[i]);
-
-        var _y = new Vector();
-        for (var i = n; i < 2 * n; ++i) _y.Add(parameters[i]);
-
-
+        var n = (parameters.Count + 1) / 4;
+        CheckParameters(parameters, n);
         return new InternalPiecewiseLinearFunction()
         {
-            x = _x,
-            y = _y,
+            x = new Vector(parameters.Take(n - 1)),
+            a = new Vector(parameters.Skip(n - 1).Take(n)),
+            b = new Vector(parameters.Skip(2 * n - 1).Take(n)),
+            c = new Vector(parameters.Skip(3 * n - 1).Take(n))
         };
     }
 }

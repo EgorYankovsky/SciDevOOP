@@ -1,5 +1,6 @@
 using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
+using SciDevOOP.MathematicalObjects;
 
 namespace SciDevOOP.Functionals;
 
