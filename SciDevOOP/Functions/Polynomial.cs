@@ -28,5 +28,4 @@ class Polynomial : IParametricFunction
 
     public IFunction Bind(IVector parameters)
         => new InternalPolynomial() { coefficients = parameters };
-
 }
