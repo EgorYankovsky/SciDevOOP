@@ -12,7 +12,7 @@ public class ThresholdImprovement(double currentTemperature, double alpha = 1.0)
     private readonly double _currentTemperature = currentTemperature;
     private readonly double _alpha = alpha;
 
-    double ITransitionRule.Value(IFunctional functional, IParametricFunction function, IVector newParameters, IVector minParameters)
+    double ITransitionRule.Value(double currentTemperature, IFunctional functional, IParametricFunction function, IVector newParameters, IVector minParameters)
     {
         var newFunction = function.Bind(newParameters);
         var minFunction = function.Bind(minParameters);

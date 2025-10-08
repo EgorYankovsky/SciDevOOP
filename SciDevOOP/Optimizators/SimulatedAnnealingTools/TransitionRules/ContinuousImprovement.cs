@@ -9,7 +9,7 @@ namespace SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 /// </summary>
 public class ContinuousImprovement : ITransitionRule
 {
-    double ITransitionRule.Value(IFunctional functional, IParametricFunction function, IVector newParameters, IVector minParameters)
+    double ITransitionRule.Value(double currentTemperature, IFunctional functional, IParametricFunction function, IVector newParameters, IVector minParameters)
     {
         var newFunction = function.Bind(newParameters);
         var minFunction = function.Bind(minParameters);
