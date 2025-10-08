@@ -6,5 +6,5 @@ namespace SciDevOOP.Optimizators.SimulatedAnnealingTools;
 
 interface ITransitionRule
 {
-    public double Value(double currentTemperature, IFunctional functional, IParametricFunction function, IVector newParameters, IVector minParameters);
+    public double Value(double currentTemperature, double newFunctionalValue, double minFunctionalValue);
 }

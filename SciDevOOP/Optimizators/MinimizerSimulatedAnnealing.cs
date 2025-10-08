@@ -25,23 +25,30 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
         var parameters = new Vector([.. initialParameters.Select(v => v)]);
         var minParameters = new Vector([.. initialParameters.Select(v => v)]);
         var f = function.Bind(parameters);
-        var functionalMinimumValue = objective.Value(f);
+        var minFunctionalValue = objective.Value(f);
 
         var rnd = new Random();
-        uint i = 0; // Current iteration.
         var ti = double.MaxValue; // Current temperature.
-        while (i < MaxIterations)
+
+        uint outerIter = 0;
+        while (ti > MinTemperature)
         {
-            parameters.ForEach(elem => elem = rnd.NextDouble());
-            ti = _temperatureChangeLaw.Value(ti, i);
-            var transitionProbability = _transitionRule.Value(ti, objective, function, parameters, minimumParameters);
-            if (transitionProbability != 0)
+            uint i = 0; // Current iteration.
+            while (i < MaxIterations)
             {
+                parameters.ForEach(value => value += rnd.NextDouble());
+                var newFunctionalValue = objective.Value(function.Bind(parameters));
+                var probability = _transitionRule.Value(ti, newFunctionalValue, minFunctionalValue);
 
-                ++i;
+                if (rnd.NextDouble() < probability)
+                {
+                    minFunctionalValue = newFunctionalValue;
+                    minParameters = parameters;
+                }
             }
+            ti = _temperatureChangeLaw.Value(ti, outerIter);
+            outerIter++;
         }
-
-        throw new NotImplementedException();
+        return minParameters; 
     }
 }
