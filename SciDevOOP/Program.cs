@@ -8,7 +8,7 @@ using SciDevOOP.MathematicalObjects;
 var optimizer = new MinimizerMonteCarlo();
 
 // 2. Начальные параметры для целевой функции.
-var initial = new Vector { 1, 1};
+var initial = new Vector { 0.1, -1, 0.8, 1, 1, -0.5, -0.2 };  
 
 // 3. Вводим точки, по которым строим сплайн (и прочее...).
 var n = int.Parse(Console.ReadLine());
@@ -20,10 +20,10 @@ for (var i = 0; i < n; i++)
 }
 
 // 4. Выбираем функционал. В качестве параметров обязательно нужны точки из п.3.
-var functional = new L1Norm() { points = points };
+var functional = new L2Norm() { points = points };
 
 // 5. Выбор целевой функции.
-var fun = new LineFunction();
+var fun = new PiecewiseLinearFunction();
 
 // 6. Решение задачи оптимизации.
 var res = optimizer.Minimize(functional, fun, initial);
