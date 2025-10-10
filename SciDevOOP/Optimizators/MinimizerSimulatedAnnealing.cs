@@ -20,7 +20,7 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
     private readonly ITransitionRule _transitionRule = transitionRule;
 
 
-    IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector minimumParameters, IVector maximumParameters)
+    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         var parameters = new Vector([.. initialParameters.Select(v => v)]);
         var minParameters = new Vector([.. initialParameters.Select(v => v)]);
@@ -36,8 +36,16 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
             uint i = 0; // Current iteration.
             while (i < MaxIterations)
             {
-                parameters.ForEach(value => value += rnd.NextDouble());
+                for (var ii = 0; ii < parameters.Count; ++ii)
+                {
+                    var sign = Math.Pow(-1, rnd.Next(2));
+                    parameters[ii] += sign * rnd.NextDouble();
+                }
+
+
+                //parameters.ForEach(value => value += rnd.NextDouble());
                 var newFunctionalValue = objective.Value(function.Bind(parameters));
+                Console.WriteLine($"Functional value: {newFunctionalValue}");
                 var probability = _transitionRule.Value(ti, newFunctionalValue, minFunctionalValue);
 
                 if (rnd.NextDouble() < probability)
