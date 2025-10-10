@@ -8,14 +8,24 @@ using SciDevOOP.MathematicalObjects;
 var optimizer = new MinimizerMonteCarlo();
 
 // 2. Начальные параметры для целевой функции.
-var initial = new Vector { 0.1, -1, 0.8, 1, 1, -0.5, -0.2 };  
+var initial = new Vector { 0.1, -1, 0.8, 1, 1, -0.5, -0.2 };
 
 // 3. Вводим точки, по которым строим сплайн (и прочее...).
-var n = int.Parse(Console.ReadLine());
+//var n = int.Parse(Console.ReadLine());
+//List<(double x, double y)> points = [];
+//for (var i = 0; i < n; i++)
+//{
+//    var str = Console.ReadLine()?.Split();
+//    points.Add((double.Parse(str[0]), double.Parse(str[1])));
+//}
+string filePath = "input.txt";
+var lines = File.ReadAllLines(filePath);
+
+var n = int.Parse(lines[0]);
 List<(double x, double y)> points = [];
-for (var i = 0; i < n; i++)
+for (var i = 1; i <= n; i++)
 {
-    var str = Console.ReadLine()?.Split();
+    var str = lines[i].Split();
     points.Add((double.Parse(str[0]), double.Parse(str[1])));
 }
 
