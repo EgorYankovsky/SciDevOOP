@@ -7,7 +7,7 @@ using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 
 
 // 1. Выбор метода оптимизации.
-var optimizer = new MinimizerSimulatedAnnealing(new ContinuousImprovement(), new BasketFiring());
+var optimizer = new MinimizerSimulatedAnnealing(new AnnealingSimulation(0.01), new BasketFiring());
 
 // 2. Начальные параметры для целевой функции.
 var initial = new Vector { 1.0, 1.0 };  
@@ -20,7 +20,7 @@ var initial = new Vector { 1.0, 1.0 };
 //    var str = Console.ReadLine()?.Split();
 //    points.Add((double.Parse(str[0]), double.Parse(str[1])));
 //}
-string filePath = "input.txt";
+var filePath = "input.txt";
 var lines = File.ReadAllLines(filePath);
 
 var n = int.Parse(lines[0]);
