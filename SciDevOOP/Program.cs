@@ -13,11 +13,21 @@ var optimizer = new MinimizerSimulatedAnnealing(new ContinuousImprovement(), new
 var initial = new Vector { 1.0, 1.0 };  
 
 // 3. Вводим точки, по которым строим сплайн (и прочее...).
-var n = int.Parse(Console.ReadLine());
+//var n = int.Parse(Console.ReadLine());
+//List<(double x, double y)> points = [];
+//for (var i = 0; i < n; i++)
+//{
+//    var str = Console.ReadLine()?.Split();
+//    points.Add((double.Parse(str[0]), double.Parse(str[1])));
+//}
+string filePath = "input.txt";
+var lines = File.ReadAllLines(filePath);
+
+var n = int.Parse(lines[0]);
 List<(double x, double y)> points = [];
-for (var i = 0; i < n; i++)
+for (var i = 1; i <= n; i++)
 {
-    var str = Console.ReadLine()?.Split();
+    var str = lines[i].Split();
     points.Add((double.Parse(str[0]), double.Parse(str[1])));
 }
 
