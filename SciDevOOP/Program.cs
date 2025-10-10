@@ -32,7 +32,7 @@ for (var i = 1; i <= n; i++)
 }
 
 // 4. Выбираем функционал. В качестве параметров обязательно нужны точки из п.3.
-var functional = new MyFunctional() { points = points };
+var functional = new L2Norm() { points = points };
 
 // 5. Выбор целевой функции.
 var fun = new LineFunction();
