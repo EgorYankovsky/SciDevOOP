@@ -7,10 +7,10 @@ using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 
 
 // 1. Выбор метода оптимизации.
-var optimizer = new MinimizerMCG();
+var optimizer = new MinimizerLevenbergMarquardt();
 
 // 2. Начальные параметры для целевой функции.
-var initial = new Vector { 1.0, 1.0 };  
+var initial = new Vector { 0, 0.5, 1.0, 1.0 };  
 
 // 3. Вводим точки, по которым строим сплайн (и прочее...).
 //var n = int.Parse(Console.ReadLine());
@@ -32,10 +32,10 @@ for (var i = 1; i <= n; i++)
 }
 
 // 4. Выбираем функционал. В качестве параметров обязательно нужны точки из п.3.
-var functional = new L2Norm() { points = points };
+var functional = new LInfNorm() { points = points };
 
 // 5. Выбор целевой функции.
-var fun = new LineFunction();
+var fun = new PiecewiseLinearFunction();
 
 // 6. Решение задачи оптимизации.
 var res = optimizer.Minimize(functional, fun, initial);
