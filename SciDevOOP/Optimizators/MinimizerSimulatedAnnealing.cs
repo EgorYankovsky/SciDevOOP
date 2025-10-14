@@ -12,8 +12,8 @@ namespace SciDevOOP.Optimizators;
 
 class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureChangeLaw temperatureChangeLaw) : IOptimizator
 {
-    public readonly uint MaxIterations = 100;
-    public readonly double MinTemperature = 10.0;
+    public readonly uint MaxIterations = 1000;
+    public readonly double MinTemperature = 0.001;
 
 
     private readonly ITemperatureChangeLaw _temperatureChangeLaw = temperatureChangeLaw;
@@ -28,7 +28,7 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
         var minFunctionalValue = objective.Value(f);
 
         var rnd = new Random();
-        var ti = double.MaxValue; // Current temperature.
+        var ti = 100.0; // Current temperature.
 
         uint outerIter = 0;
         while (ti > MinTemperature)
@@ -39,24 +39,23 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
                 for (var ii = 0; ii < parameters.Count; ++ii)
                 {
                     var sign = Math.Pow(-1, rnd.Next(2));
-                    parameters[ii] += sign * rnd.NextDouble();
+                    parameters[ii] = minParameters[ii] + sign * rnd.NextDouble();
                 }
 
-
-                //parameters.ForEach(value => value += rnd.NextDouble());
                 var newFunctionalValue = objective.Value(function.Bind(parameters));
-                Console.WriteLine($"Functional value: {newFunctionalValue}");
                 var probability = _transitionRule.Value(ti, newFunctionalValue, minFunctionalValue);
 
                 if (rnd.NextDouble() < probability)
                 {
                     minFunctionalValue = newFunctionalValue;
-                    minParameters = parameters;
+                    minParameters = [.. parameters.Select(v => v)];
                 }
+                ++i;
             }
-            ti = _temperatureChangeLaw.Value(ti, outerIter);
             outerIter++;
+            ti = _temperatureChangeLaw.Value(ti, outerIter);
         }
+        Console.WriteLine($"Total iterations: {outerIter * MaxIterations}");
         return minParameters; 
     }
 }

@@ -20,7 +20,7 @@ var initial = new Vector { 0, 0.5, 1.0, 1.0 };
 //    var str = Console.ReadLine()?.Split();
 //    points.Add((double.Parse(str[0]), double.Parse(str[1])));
 //}
-string filePath = "input.txt";
+var filePath = "input.txt";
 var lines = File.ReadAllLines(filePath);
 
 var n = int.Parse(lines[0]);
