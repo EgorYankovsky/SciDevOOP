@@ -2,7 +2,9 @@
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.MathematicalObjects;
 
-public class IntegrationNorm : IFunctional
+namespace SciDevOOP.Functionals;
+
+class IntegrationNorm : IFunctional
 {
     public List<(double x, double y)> points; // Точки для численного интегрирования
     public double LowerBound { get; set; }

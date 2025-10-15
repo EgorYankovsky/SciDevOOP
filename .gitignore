@@ -5,3 +5,11 @@
 *.*.json
 **/Debug/
 **/obj/
+*.log
+*.out
+*.toc
+raport.pdf
+*.aux
+*.pygtex
+*.pygstyle
+*.gz
