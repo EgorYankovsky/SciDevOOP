@@ -21,7 +21,7 @@ class LineFunctionN : IParametricFunction
         {
             if (point.Count != coefficients?.Count - 1)
                 throw new ArgumentException("Points dimension isn't equal to coefficients.");
-            var sum = coefficients[0];
+            var sum = coefficients![0];
             foreach (var (p, c) in point.Zip(coefficients.Skip(1)!))
                 sum += p * c;
             return sum;
