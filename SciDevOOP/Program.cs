@@ -7,6 +7,19 @@ using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 using System.Reflection;
 using System.Text;
 
+var A = new Matrix(4, 4);
+var b = new Vector { 22, 34, 32, 12 };
+
+for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j)
+        A[i, j] = i + j;
+
+var x = A * b;
+foreach (var xi in x)
+    Console.WriteLine(xi);
+
+
+return 0;
 
 // 1. Выбор метода оптимизации.
 var optimizer = new MinimizerMonteCarlo { From = -5.0, To = 5.0, MaxIterations = 50_000_000 };
