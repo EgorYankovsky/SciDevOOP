@@ -4,7 +4,7 @@ using SciDevOOP.MathematicalObjects;
 
 namespace SciDevOOP.Functionals;
 
-public class LInfNorm : IFunctional
+class LInfNorm : IFunctional
 {
     public List<(double x, double y)> points;
 

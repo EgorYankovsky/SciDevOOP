@@ -5,7 +5,7 @@ using SciDevOOP.MathematicalObjects;
 
 namespace SciDevOOP.Functionals;
 
-public class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
+class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 {
     public List<(double x, double y)> points;
 

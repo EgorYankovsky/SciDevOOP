@@ -7,7 +7,6 @@ using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools;
 
-
 namespace SciDevOOP.Optimizators;
 
 class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureChangeLaw temperatureChangeLaw) : IOptimizator
