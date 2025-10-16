@@ -25,6 +25,18 @@ public class Matrix : IMatrix
         return transposedMatrix;
     }
 
+    public static Matrix operator *(Matrix m1, Matrix m2)
+    {
+        if (m1.M != m2.N || m1.N != m2.M) throw new ArgumentException("Matrix multiplication is impossible.");
+        var ans = new Matrix(m1.N, m1.N);
+
+        for (int i = 0; i < ans.N; i++)
+            for (int j = 0; j < ans.N; j++)
+                for (int k = 0; k < m1.M; k++)
+                    ans[i, j] += m1[i, k] * m2[k, j];
+        return ans;
+    }
+
     public Matrix(int n, int m)
     {
         N = n;
