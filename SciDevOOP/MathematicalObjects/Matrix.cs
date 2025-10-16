@@ -16,6 +16,15 @@ public class Matrix : IMatrix
         set => _values[i, j] = value;
     }
 
+    public Matrix GetTransposed()
+    {
+        var transposedMatrix = new Matrix(M, N);
+        for (int i = 0; i < M; ++i)
+            for (int j = 0; j < N; ++j)
+                transposedMatrix[i, j] = _values[j, i];
+        return transposedMatrix;
+    }
+
     public Matrix(int n, int m)
     {
         N = n;
