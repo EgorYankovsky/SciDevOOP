@@ -28,7 +28,6 @@ public class Matrix : IMatrix
         // Copy matrix.
     }
 
-
     [Obsolete(message:"No need usage.", true)]
     public int Count => throw new NotImplementedException();
     [Obsolete(message: "No need usage.", true)]
