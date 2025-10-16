@@ -34,8 +34,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
         int k = 0;
 
         // Вычисляем начальные невязки и якобиан
-        var residuals = ComputeResiduals(objective, function, x);
-        var J = ComputeJacobian(objective, function, x, residuals.Length);
+        Vector residuals = ComputeResiduals(objective, function, x);
+        var J = ComputeJacobian(objective, function, x, residuals.Count);
 
         double cost_curr = ComputeCost(residuals);
 
@@ -51,13 +51,14 @@ class MinimizerLevenbergMarquardt : IOptimizator
             }
 
             // Создаем матрицу Гессе приближение: J^T * J
-            var JTJ = ComputeHessianApproximation(J, residuals.Length);
+            //var JTJ = ComputeHessianApproximation(J, residuals.Length);
+            var JTJ = J.GetTransposed() * J;
 
             // Добавляем параметр регуляризации к диагонали
-            var A = AddLambdaToDiagonal(JTJ, lambda, n);
+            AddLambdaToDiagonal(JTJ, lambda, n);
 
             // Решаем систему: (J^T * J + lambda * I) * h = -J^T * r
-            var h = SolveLinearSystem(A, gradient, -1.0, n);
+            var h = SolveLinearSystem(JTJ, gradient, -1.0, n);
 
             // Предлагаемый следующий шаг
             var x_next = new Vector();
@@ -72,7 +73,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
 
             // Вычисляем фактическое и предсказанное уменьшение
             double actualReduction = cost_curr - cost_next;
-            double predictedReduction = ComputePredictedReduction(J, gradient, h, lambda, residuals.Length);
+            double predictedReduction = ComputePredictedReduction(J, gradient, h, lambda, residuals.Count);
 
             // Коэффициент качества шага
             double rho = (predictedReduction != 0)
@@ -87,7 +88,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 cost_curr = cost_next;
 
                 // Пересчитываем якобиан в новой точке
-                J = ComputeJacobian(objective, function, x, residuals.Length);
+                J = ComputeJacobian(objective, function, x, residuals.Count);
 
                 // Уменьшаем параметр регуляризации
                 lambda = Math.Max(lambda / Nu, 1e-16);
@@ -122,7 +123,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return x;
     }
 
-    private double[] ComputeResiduals(IFunctional objective, IParametricFunction function, IVector parameters)
+    private Vector ComputeResiduals(IFunctional objective, IParametricFunction function, IVector parameters)
     {
         // Получаем функцию с текущими параметрами
         var fun = function.Bind(parameters);
@@ -135,7 +136,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
             var points = pointsField.GetValue(objective) as List<(double x, double y)>;
             if (points != null)
             {
-                var residuals = new double[points.Count];
+                var residuals = new Vector(points.Count);
 
                 for (int i = 0; i < points.Count; i++)
                 {
@@ -146,7 +147,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
                     // Вычисляем предсказание модели
                     double prediction = fun.Value(input);
                     // Невязка: prediction - actual
-                    residuals[i] = prediction - points[i].y;
+                    residuals.Add(prediction - points[i].y);
                 }
 
                 return residuals;
@@ -156,7 +157,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         throw new InvalidOperationException("Cannot access data points from functional");
     }
 
-    private IMatrix ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
+    private Matrix ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
     {
         // Якобиан: производные невязок по параметрам
         int n = parameters.Count; // число параметров
@@ -182,88 +183,61 @@ class MinimizerLevenbergMarquardt : IOptimizator
             for (int i = 0; i < m; i++)
             {
                 double derivative = (perturbedResiduals[i] - baseResiduals[i]) / H;
-                jacobian[i, j] = derivative;
+                jacobian[j, i] = derivative;
             }
         }
 
         return jacobian;
     }
 
-    private IVector ComputeGradient(IMatrix jacobian, double[] residuals)
+    private IVector ComputeGradient(Matrix jacobian, Vector residuals)
     {
-        // Градиент: J^T * r
-        int m = residuals.Length; // число точек данных
-        int n = jacobian.Count / m; // число параметров
-
-        var gradient = new Vector();
-
-        for (int j = 0; j < n; j++)
-        {
-            double sum = 0;
-            for (int i = 0; i < m; i++)
-            {
-                sum += jacobian[j * m + i] * residuals[i];
-            }
-            gradient.Add(sum);
-        }
-
+        var gradient = jacobian * residuals;        
         return gradient;
     }
 
-    private IVector ComputeHessianApproximation(IMatrix jacobian, int dataCount)
+    //private IVector ComputeHessianApproximation(IMatrix jacobian, int dataCount)
+    //{
+    //    // Hessian approximation: J^T * J
+    //    int m = dataCount; // число точек данных
+    //    int n = jacobian.Count / m; // число параметров
+
+    //    var hessian = new Vector();
+
+    //    for (int i = 0; i < n; i++)
+    //    {
+    //        for (int j = 0; j < n; j++)
+    //        {
+    //            double sum = 0;
+    //            for (int k = 0; k < m; k++)
+    //            {
+    //                sum += jacobian[i * m + k] * jacobian[j * m + k];
+    //            }
+    //            hessian.Add(sum);
+    //        }
+    //    }
+
+    //    return hessian;
+    //}
+
+    private void AddLambdaToDiagonal(Matrix matrix, double lambda, int n)
     {
-        // Hessian approximation: J^T * J
-        int m = dataCount; // число точек данных
-        int n = jacobian.Count / m; // число параметров
-
-        var hessian = new Vector();
-
         for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                double sum = 0;
-                for (int k = 0; k < m; k++)
-                {
-                    sum += jacobian[i * m + k] * jacobian[j * m + k];
-                }
-                hessian.Add(sum);
-            }
-        }
-
-        return hessian;
+            matrix[i,i] += lambda;
     }
 
-    private IVector AddLambdaToDiagonal(IVector matrix, double lambda, int n)
-    {
-        var result = new Vector();
-
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                double value = matrix[i * n + j];
-                if (i == j)
-                    value += lambda;
-                result.Add(value);
-            }
-        }
-
-        return result;
-    }
-
-    private double ComputeCost(double[] residuals)
+    private double ComputeCost(Vector residuals)
     {
         // Сумма квадратов невязок
         double sum = 0;
-        for (int i = 0; i < residuals.Length; i++)
+        for (int i = 0; i < residuals.Count; i++)
         {
             sum += residuals[i] * residuals[i];
         }
         return 0.5 * sum; // 1/2 для упрощения производных
     }
 
-    private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
+    private double ComputePredictedReduction(Matrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
         // Предсказанное уменьшение: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
         double linearTerm = 0;
@@ -286,7 +260,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 double hessianElement = 0;
                 for (int k = 0; k < m; k++)
                 {
-                    hessianElement += J[i * m + k] * J[j * m + k];
+                    hessianElement += J[i, k] * J[j, k];
                 }
                 quadraticTerm += h[i] * hessianElement * h[j];
             }
@@ -297,7 +271,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return linearTerm - 0.5 * quadraticTerm;
     }
 
-    private IVector SolveLinearSystem(IVector A, IVector b, double scale, int n)
+    private IVector SolveLinearSystem(Matrix A, IVector b, double scale, int n)
     {
         // Создаем расширенную матрицу
         var augmented = new double[n, n + 1];
@@ -306,7 +280,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         {
             for (int j = 0; j < n; j++)
             {
-                augmented[i, j] = A[i * n + j];
+                augmented[i, j] = A[i, j];
             }
             augmented[i, n] = scale * b[i];
         }
