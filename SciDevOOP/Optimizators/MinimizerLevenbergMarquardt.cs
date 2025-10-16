@@ -156,13 +156,13 @@ class MinimizerLevenbergMarquardt : IOptimizator
         throw new InvalidOperationException("Cannot access data points from functional");
     }
 
-    private IVector ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
+    private IMatrix ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
     {
         // Якобиан: производные невязок по параметрам
         int n = parameters.Count; // число параметров
         int m = dataCount;        // число точек данных
 
-        var jacobian = new Vector();
+        var jacobian = new Matrix(n, m);
 
         // Базовые невязки
         var baseResiduals = ComputeResiduals(objective, function, parameters);
@@ -182,14 +182,14 @@ class MinimizerLevenbergMarquardt : IOptimizator
             for (int i = 0; i < m; i++)
             {
                 double derivative = (perturbedResiduals[i] - baseResiduals[i]) / H;
-                jacobian.Add(derivative);
+                jacobian[i, j] = derivative;
             }
         }
 
         return jacobian;
     }
 
-    private IVector ComputeGradient(IVector jacobian, double[] residuals)
+    private IVector ComputeGradient(IMatrix jacobian, double[] residuals)
     {
         // Градиент: J^T * r
         int m = residuals.Length; // число точек данных
@@ -210,7 +210,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return gradient;
     }
 
-    private IVector ComputeHessianApproximation(IVector jacobian, int dataCount)
+    private IVector ComputeHessianApproximation(IMatrix jacobian, int dataCount)
     {
         // Hessian approximation: J^T * J
         int m = dataCount; // число точек данных
@@ -263,7 +263,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return 0.5 * sum; // 1/2 для упрощения производных
     }
 
-    private double ComputePredictedReduction(IVector J, IVector gradient, IVector h, double lambda, int dataCount)
+    private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
         // Предсказанное уменьшение: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
         double linearTerm = 0;
