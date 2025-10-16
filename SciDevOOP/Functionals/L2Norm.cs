@@ -1,4 +1,5 @@
-﻿using SciDevOOP.ImmutableInterfaces.Functionals;
+﻿using SciDevOOP.Functions;
+using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
@@ -12,7 +13,7 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
     IVector IDifferentiableFunctional.Gradient(IFunction function)
     {
         var gradient = new Vector();
-        double l2Value = ((IFunctional)this).Value(function);
+        var l2Value = ((IFunctional)this).Value(function);
 
         if (Math.Abs(l2Value) < 1e-15)
         {
@@ -32,19 +33,32 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
     IMatrix ILeastSquaresFunctional.Jacobian(IFunction function)
     {
-        throw new NotImplementedException();
+        var Jacobian = new Matrix();
+        var baseResidual = (this as ILeastSquaresFunctional).Residual(function);
+
+
+
+        for (int j = 0; j < points.Count; ++j)
+        {
+            var perturbed = new Vector();
+        }
+
+        return Jacobian;
     }
 
     IVector ILeastSquaresFunctional.Residual(IFunction function)
     {
-        var residual = new Vector();
-        foreach (var (x, y) in points)
+        var residuals = new Vector();
+        for (var i = 0; i < points.Count; i++)
         {
-            var param = new Vector() { x };
-            var diff = function.Value(param) - y;
-            residual.Add(diff);
+            // Create input vector for function.
+            var input = new Vector { points[i].x };
+            // Account model's prediction.
+            var prediction = function.Value(input);
+            // Residual: prediction - actual
+            residuals.Add(prediction - points[i].y);
         }
-        return residual;
+        return residuals;
     }
 
     double IFunctional.Value(IFunction function)

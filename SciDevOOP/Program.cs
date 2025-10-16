@@ -7,6 +7,7 @@ using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 using System.Reflection;
 using System.Text;
 
+/*
 var A = new Matrix(4, 4);
 var b = new Vector { 22, 34, 32, 12 };
 
@@ -20,25 +21,14 @@ foreach (var xi in x)
 
 
 return 0;
+*/
 
-// 1. Выбор метода оптимизации.
-var optimizer = new MinimizerMonteCarlo { From = -5.0, To = 5.0, MaxIterations = 50_000_000 };
-
-// 2. Начальные параметры для целевой функции.
-var initial = new Vector { 1.0, 1.0, 1.0 };
-
-// 3. Вводим точки, по которым строим сплайн (и прочее...).
-//var n = int.Parse(Console.ReadLine());
-//List<(double x, double y)> points = [];
-//for (var i = 0; i < n; i++)
-//{
-//    var str = Console.ReadLine()?.Split();
-//    points.Add((double.Parse(str[0]), double.Parse(str[1])));
-//}
-//var filePath = "input.txt";
+var optimizer = new MinimizerLevenbergMarquardt();
+var fun = new LineFunction();
+var initial = new Vector { 1.0, 1.0 };
 
 var name = Assembly.GetExecutingAssembly().GetName().Name;
-using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{name}.Resources.input1.txt");
+using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{name}.Resources.input.txt");
 using var streamReader = new StreamReader(stream!, encoding: Encoding.UTF8);
 var lines = streamReader.ReadToEnd().Split("\n");
 
@@ -49,16 +39,6 @@ for (var i = 1; i <= n; i++)
     var str = lines[i].Split();
     points.Add((double.Parse(str[0]), double.Parse(str[1])));
 }
-
-// 4. Выбираем функционал. В качестве параметров обязательно нужны точки из п.3.
-var functional = new MyFunctional { points = points };
-
-// 5. Выбор целевой функции.
-var fun = new Polynomial();
-
-// 6. Решение задачи оптимизации.
+var functional = new L2Norm { points = points };
 var res = optimizer.Minimize(functional, fun, initial);
-
-// 7. Вывод результата. (Целевые коэффициенты для функции).
-foreach (var r in res)
-    Console.WriteLine(r);
+foreach (var r in res) Console.WriteLine(r);
