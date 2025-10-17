@@ -116,7 +116,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         var n = parameters.Count; // Parameters amount.
         var m = dataCount;        // Data points amount.
 
-        var jacobian = new Vector();
+        var jacobian = new Matrix(n, m);
 
         // Basic residuals.
         var baseResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(parameters));
@@ -207,7 +207,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return 0.5 * sum; // 1/2 for derivative's simplification
     }
 
-    private double ComputePredictedReduction(IVector J, IVector gradient, IVector h, double lambda, int dataCount)
+    private double ComputePredictedReduction(Matrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
         // Predicted reduction: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
         var linearTerm = 0.0D;
@@ -236,7 +236,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return linearTerm - 0.5 * quadraticTerm;
     }
 
-    private IVector SolveLinearSystem(IVector A, IVector b, double scale, int n)
+    private IVector SolveLinearSystem(Matrix A, IVector b, double scale, int n)
     {
         // Create augmented matrix
         var augmented = new double[n, n + 1];
