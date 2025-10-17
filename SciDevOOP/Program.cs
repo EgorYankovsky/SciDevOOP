@@ -7,19 +7,22 @@ using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 using System.Reflection;
 using System.Text;
 
+using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
+
 /*
 var A = new Matrix(4, 4);
-var b = new Vector { 22, 34, 32, 12 };
+var b = new Vector { 19, 85, 112, 161 };
 
-for (int i = 0; i < 4; ++i)
-    for (int j = 0; j < 4; ++j)
-        A[i, j] = i + j;
+A[0][0] = 1; A[0][1] = 2; A[0][2] = 3; A[0][3] = 4;
+A[1][0] = 2; A[1][1] = 8; A[1][2] = 13; A[1][3] = 20;
+A[2][0] = 3; A[2][1] = 13; A[2][2] = 18; A[2][3] = 25;
+A[3][0] = 4; A[3][1] = 20; A[3][2] = 25; A[3][3] = 36;
 
-var x = A * b;
+var slvr = new NewGauss();
+
+var x = slvr.Solve(A, b);
 foreach (var xi in x)
     Console.WriteLine(xi);
-
-
 return 0;
 */
 

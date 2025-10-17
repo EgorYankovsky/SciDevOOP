@@ -2,7 +2,7 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
 namespace SciDevOOP.MathematicalObjects;
 
-public class Vector : List<double>, INormable
+public class Vector : List<double>, INormable, IVectorMultiplicand
 {
     public Vector() : base() { }
 
@@ -16,5 +16,13 @@ public class Vector : List<double>, INormable
         for (var i = 0; i < Count; ++i)
             sum += this[i] * this[i];
         return Math.Sqrt(sum);
+    }
+
+    double IVectorMultiplicand.Multiplicate(IVector v)
+    {
+        var sum = 0.0;
+        for (var i = 0; i < Count; ++i)
+            sum += this[i] * v[i];
+        return sum;
     }
 }
