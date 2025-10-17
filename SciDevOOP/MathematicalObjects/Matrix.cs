@@ -8,8 +8,8 @@ public class Matrix : List<IList<double>>, IDenseMatrix
     public int N { get; init; } 
     public int M { get; init; }
 
-    double IDenseMatrix.this[int i, int j] 
-    { 
+    double IDenseMatrix.this[int i, int j]
+    {
         get => throw new NotImplementedException(); 
         set => throw new NotImplementedException(); 
     }
@@ -31,12 +31,27 @@ public class Matrix : List<IList<double>>, IDenseMatrix
 
     IVector IDenseMatrix.Multiplicate(IVector v)
     {
-        throw new NotImplementedException();
+        var ans = new Vector();
+        for (var i = 0; i < v.Count; ++i)
+        {
+            var sum = 0.0;
+            for (var j = 0; j < v.Count; ++j)
+                sum += this[i, j] * v[j];
+            ans.Add(sum);
+        }
+        return ans;
     }
 
-    IMatrix IDenseMatrix.Multiplicate(IMatrix M)
+    IMatrix IDenseMatrix.Multiplicate(IDenseMatrix A)
     {
-        return this * (M as Matrix)!;
+        if (M != A.N || N != A.M) throw new ArgumentException("Matrix multiplication is impossible.");
+        var ans = new Matrix(N, N);
+
+        for (var i = 0; i < ans.N; i++)
+            for (var j = 0; j < ans.N; j++)
+                for (var k = 0; k < M; k++)
+                    ans[i, j] += this[i, k] * A[k, j];
+        return ans;
     }
 
     IMatrix IDenseMatrix.GetTransposed() => GetTransposed();
