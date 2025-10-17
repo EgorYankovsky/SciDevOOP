@@ -163,10 +163,41 @@ class MinimizerLevenbergMarquardt : IOptimizator
     [Obsolete(message:"Change this method to matrices multiplication.", false)]
     private IVector ComputeHessianApproximation(IVector jacobian, int dataCount)
     {
-        for (int i = 0; i < n; i++)
-            matrix[i,i] += lambda;
+        // Hessian approximation: J^T * J
+        var m = dataCount; // Data points amount
+        var n = jacobian.Count / m; // Parameters amount
+        var hessian = new Vector();
+        for (var i = 0; i < n; i++)
+        {
+            for (var j = 0; j < n; j++)
+            {
+                var sum = 0.0D;
+                for (var k = 0; k < m; k++)
+                    sum += jacobian[i * m + k] * jacobian[j * m + k];
+                hessian.Add(sum);
+            }
+        }
+        return hessian;
     }
 
+    [Obsolete("Method must be replaced with matrix's manipulations", false)]
+    private IVector AddLambdaToDiagonal(IVector matrix, double lambda, int n)
+    {
+        var result = new Vector();
+        for (var i = 0; i < n; i++)
+        {
+            for (var j = 0; j < n; j++)
+            {
+                var value = matrix[i * n + j];
+                if (i == j)
+                    value += lambda;
+                result.Add(value);
+            }
+        }
+        return result;
+    }
+
+    [Obsolete(message:"Replace with half of vector's norm", false)]
     private double ComputeCost(IVector residuals)
     {
         // Residual's squares
@@ -178,113 +209,98 @@ class MinimizerLevenbergMarquardt : IOptimizator
 
     private double ComputePredictedReduction(Matrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
-        // Предсказанное уменьшение: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
-        double linearTerm = 0;
-        double quadraticTerm = 0;
-        int n = h.Count;
-        int m = dataCount;
+        // Predicted reduction: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
+        var linearTerm = 0.0D;
+        var quadraticTerm = 0.0D;
+        var n = h.Count;
+        var m = dataCount;
 
-        // -h^T * gradient (где gradient = J^T * r)
-        for (int i = 0; i < n; i++)
-        {
+        // -h^T * gradient (where gradient = J^T * r)
+        for (var i = 0; i < n; i++)
             linearTerm += -h[i] * gradient[i];
-        }
 
         // 0.5 * h^T * (J^T * J + lambda * I) * h
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
-            for (int j = 0; j < n; j++)
+            for (var j = 0; j < n; j++)
             {
-                // (J^T * J) часть
+                // (J^T * J)
                 double hessianElement = 0;
-                for (int k = 0; k < m; k++)
-                {
-                    hessianElement += J[i, k] * J[j, k];
-                }
+                for (var k = 0; k < m; k++)
+                    hessianElement += J[i * m + k] * J[j * m + k];
                 quadraticTerm += h[i] * hessianElement * h[j];
             }
-            // lambda * I часть
+            // lambda * I
             quadraticTerm += lambda * h[i] * h[i];
         }
-
         return linearTerm - 0.5 * quadraticTerm;
     }
 
     private IVector SolveLinearSystem(Matrix A, IVector b, double scale, int n)
     {
-        // Создаем расширенную матрицу
+        // Create augmented matrix
         var augmented = new double[n, n + 1];
 
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
-            for (int j = 0; j < n; j++)
-            {
-                augmented[i, j] = A[i, j];
-            }
+            for (var j = 0; j < n; j++)
+                augmented[i, j] = A[i * n + j];
             augmented[i, n] = scale * b[i];
         }
 
-        // Прямой ход метода Гаусса
-        for (int i = 0; i < n; i++)
+        // Gauss forward elimination
+        for (var i = 0; i < n; i++)
         {
-            // Поиск главного элемента
-            int maxRow = i;
-            for (int k = i + 1; k < n; k++)
+            // Search for the main element
+            var maxRow = i;
+            for (var k = i + 1; k < n; k++)
             {
                 if (Math.Abs(augmented[k, i]) > Math.Abs(augmented[maxRow, i]))
                     maxRow = k;
             }
 
-            // Перестановка строк
+            // Swap rows
             if (maxRow != i)
-            {
-                for (int k = 0; k <= n; k++)
-                {
-                    var temp = augmented[i, k];
-                    augmented[i, k] = augmented[maxRow, k];
-                    augmented[maxRow, k] = temp;
-                }
-            }
+                for (var k = 0; k <= n; k++)
+                    (augmented[maxRow, k], augmented[i, k]) = (augmented[i, k], augmented[maxRow, k]);
 
-            // Проверка на вырожденность
+
+            // Degeneracy check
             if (Math.Abs(augmented[i, i]) < 1e-15)
             {
-                // Возвращаем нулевое решение
+                // Return zeros
                 var zeroSolution = new Vector();
-                for (int idx = 0; idx < n; idx++)
+                for (var idx = 0; idx < n; idx++)
                     zeroSolution.Add(0);
                 return zeroSolution;
             }
 
-            // Исключение
-            for (int k = i + 1; k < n; k++)
+            // Exception
+            for (var k = i + 1; k < n; k++)
             {
-                double factor = augmented[k, i] / augmented[i, i];
-                for (int j = i; j <= n; j++)
-                {
+                var factor = augmented[k, i] / augmented[i, i];
+                for (var j = i; j <= n; j++)
                     augmented[k, j] -= factor * augmented[i, j];
-                }
             }
         }
 
-        // Обратный ход
+        // Backward elimination
         var solution = new Vector();
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
             solution.Add(0);
 
-        for (int i = n - 1; i >= 0; i--)
+        for (var i = n - 1; i >= 0; i--)
         {
             solution[i] = augmented[i, n];
-            for (int j = i + 1; j < n; j++)
-            {
+            for (var j = i + 1; j < n; j++)
                 solution[i] -= augmented[i, j] * solution[j];
-            }
             solution[i] /= augmented[i, i];
         }
 
         return solution;
     }
 
+    [Obsolete(message:"Replace it with vector's norm", false)]
     private double Norm(IVector x)
     {
         double sum = 0;
