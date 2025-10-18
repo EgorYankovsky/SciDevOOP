@@ -3,6 +3,8 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
+using SciDevOOP.Optimizators.LevenbergMarquardtTools;
+using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +17,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
     public double LambdaInit = 0.01;
     public double Nu = 10.0;
     public double H = 1e-8; // Step for numerical derivatives.
+    public ISolver? Solver;
+
 
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector minimumParameters = null, IVector maximumParameters = null)
     {
@@ -42,38 +46,49 @@ class MinimizerLevenbergMarquardt : IOptimizator
         
         var J = ComputeJacobian(objective, function, x0, residuals.Count);
 
-        var costCurr = ComputeCost(residuals);
+        var costCurr = 0.5 * (residuals as IVectorMultiplicand)!.Multiplicate(residuals); // ComputeCost(residuals);
 
         while (k < MaxIterations)
         {
             // Account gradient: J^T * r
-            var gradient = ComputeGradient(J, residuals);
+            var gradient = (J as IMatrixMultiplicand)!.Multiplicate(residuals);
             //var gradient = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(x0));
 
             // Check gradient's norm.
-            if (Norm(gradient) < Tolerance) return x0;
-            
+            if ((gradient as INormable)!.Norma() < Tolerance) return x0;
+
             // Hessian generation: J^T * J
-            var JTJ = ComputeHessianApproximation(J, residuals.Count);
+            //var JTJ = ComputeHessianApproximation(J, residuals.Count);
+            var Jt = (J as IDenseMatrix)!.GetTransposed();
+            var JTJ = (J as IMatrixMultiplicand)!.Multiplicate(Jt);
+
 
             // Add regularization parameters
-            var A = AddLambdaToDiagonal(JTJ, lambda, n);
+            //var A = AddLambdaToDiagonal(JTJ, lambda, n);
+            for (var i = 0; i < JTJ.Count; ++i) JTJ[i][i] += lambda;
+
 
             // Solve system: (J^T * J + lambda * I) * h = -J^T * r
-            var h = SolveLinearSystem(A, gradient, -1.0, n);
+            //var h = SolveLinearSystem(JTJ, gradient, -1.0, n);
+            if (Solver is null)
+            {
+                Console.WriteLine("Cause Solver is null it set immediately as Gauss.");
+                Solver = new NewGauss();
+            }
+            var h = Solver.Solve(JTJ, gradient);
 
             // Supposed next step
             var nextX = new Vector();
             for (var i = 0; i < n; i++) nextX.Add(x0[i] + h[i]);
 
             // Account next residual 
-            var residuals_next = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(nextX));
+            var nextResidual = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(nextX));
 
             // Account sum of residual squares.
-            var cost_next = ComputeCost(residuals_next);
+            var nextCost = 0.5 * (nextResidual as IVectorMultiplicand)!.Multiplicate(nextResidual); // ComputeCost(residuals_next);
 
             // Account actual and supposed residual.
-            var actualReduction = costCurr - cost_next;
+            var actualReduction = costCurr - nextCost;
             var predictedReduction = ComputePredictedReduction(J, gradient, h, lambda, residuals.Count);
 
             // Coefficient of step's quality.
@@ -85,8 +100,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
             {
                 // Successful step - accept it.
                 x0 = nextX;
-                residuals = residuals_next;
-                costCurr = cost_next;
+                residuals = nextResidual;
+                costCurr = nextCost;
 
                 // Account Jacobian at new point
                 J = ComputeJacobian(objective, function, x0, residuals.Count);
@@ -102,13 +117,47 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 // Return if lambda too big.
                 if (lambda > 1e16) return x0;
             }
-            if (Norm(h) < Tolerance * (1 + Norm(x0))) return x0;
+            //if (Norm(h) < Tolerance * (1 + Norm(x0))) return x0;
+            if ((h as INormable)!.Norma() < Tolerance * (1 + (x0 as INormable)!.Norma())) return x0;
             if (Math.Abs(actualReduction) < Tolerance) return x0;
             k++;
         }
         return x0;
     }
 
+    private IMatrix ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
+    {
+        // Jacobian: residual's derivatives by parameters.
+        var n = parameters.Count; // Parameters amount.
+        var m = dataCount;        // Data points amount.
+
+        var jacobian = new Matrix(n, m);
+
+        // Basic residuals.
+        var baseResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(parameters));
+
+        for (var j = 0; j < n; j++)
+        {
+            // Perturbations vector for j-th parameter.
+            var perturbed = new Vector();
+            for (var k = 0; k < n; k++)
+                perturbed.Add(parameters[k]);
+            perturbed[j] += H;
+
+            // Residuals with perturbations.
+            var perturbedResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(perturbed));
+
+            // Account derivatives by j-th parameter.
+            for (var i = 0; i < m; i++)
+            {
+                var derivative = (perturbedResiduals[i] - baseResiduals[i]) / H;
+                jacobian[j][i] = derivative;
+            }
+        }
+        return jacobian;
+    }
+
+#if BEER
     [Obsolete(message: "Method should be deleted.", false)]
     private IVector ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
     {
@@ -141,6 +190,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         }
         return jacobian;
     }
+#endif
 
     // It's just matrix and vector multiplication.
     [Obsolete(message: "Method should be deleted.", false)]
@@ -160,7 +210,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return gradient;
     }
 
-    [Obsolete(message:"Change this method to matrices multiplication.", false)]
+    [Obsolete(message:"Change this method to matrices multiplication.", true)]
     private IVector ComputeHessianApproximation(IVector jacobian, int dataCount)
     {
         // Hessian approximation: J^T * J
@@ -197,17 +247,38 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return result;
     }
 
-    [Obsolete(message:"Replace with half of vector's norm", false)]
-    private double ComputeCost(IVector residuals)
+    private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
-        // Residual's squares
-        double sum = 0;
-        for (var i = 0; i < residuals.Count; i++)
-            sum += residuals[i] * residuals[i];
-        return 0.5 * sum; // 1/2 for derivative's simplification
+        // Predicted reduction: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
+        var linearTerm = 0.0D;
+        var quadraticTerm = 0.0D;
+        var n = h.Count;
+        var m = dataCount;
+
+        // -h^T * gradient (where gradient = J^T * r)
+        for (var i = 0; i < n; i++)
+            linearTerm += -h[i] * gradient[i];
+
+        // 0.5 * h^T * (J^T * J + lambda * I) * h
+        for (var i = 0; i < n; i++)
+        {
+            for (var j = 0; j < n; j++)
+            {
+                // (J^T * J)
+                double hessianElement = 0;
+                for (var k = 0; k < m; k++)
+                    hessianElement += J[i][k] * J[j][k];
+                quadraticTerm += h[i] * hessianElement * h[j];
+            }
+            // lambda * I
+            quadraticTerm += lambda * h[i] * h[i];
+        }
+        return linearTerm - 0.5 * quadraticTerm;
     }
 
-    private double ComputePredictedReduction(Matrix J, IVector gradient, IVector h, double lambda, int dataCount)
+
+#if BEER
+    private double ComputePredictedReduction(IVector J, IVector gradient, IVector h, double lambda, int dataCount)
     {
         // Predicted reduction: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
         var linearTerm = 0.0D;
@@ -235,6 +306,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         }
         return linearTerm - 0.5 * quadraticTerm;
     }
+#endif
 
     private IVector SolveLinearSystem(Matrix A, IVector b, double scale, int n)
     {
@@ -298,14 +370,5 @@ class MinimizerLevenbergMarquardt : IOptimizator
         }
 
         return solution;
-    }
-
-    [Obsolete(message:"Replace it with vector's norm", false)]
-    private double Norm(IVector x)
-    {
-        double sum = 0;
-        for (int i = 0; i < x.Count; i++)
-            sum += x[i] * x[i];
-        return Math.Sqrt(sum);
     }
 }
