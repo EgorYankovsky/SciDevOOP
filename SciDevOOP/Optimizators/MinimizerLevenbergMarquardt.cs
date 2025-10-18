@@ -165,7 +165,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         var n = parameters.Count; // Parameters amount.
         var m = dataCount;        // Data points amount.
 
-        var jacobian = new Vector();
+        var jacobian = new Matrix(n, m);
 
         // Basic residuals.
         var baseResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(parameters));
@@ -308,7 +308,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
     }
 #endif
 
-    private IVector SolveLinearSystem(IVector A, IVector b, double scale, int n)
+    private IVector SolveLinearSystem(Matrix A, IVector b, double scale, int n)
     {
         // Create augmented matrix
         var augmented = new double[n, n + 1];
