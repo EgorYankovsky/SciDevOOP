@@ -9,7 +9,7 @@ class NewGauss : ISolver
     {
         if (A.Count != A[0].Count || A.Count != b.Count) throw new ArgumentException($"Impossible to solve SLAE with Matrix of {A.Count}x{A[0].Count} and Vector of {b.Count}");
         var n = A.Count;
-        var scale = 1.0D;
+        var scale = -1.0D;
 
         // Create augmented matrix
         var augmented = new double[n, n + 1];
