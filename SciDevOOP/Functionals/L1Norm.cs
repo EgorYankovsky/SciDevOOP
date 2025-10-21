@@ -21,45 +21,17 @@ class L1Norm : IDifferentiableFunctional
         return sum;
     }
 
-    //IVector IDifferentiableFunctional.Gradient(IFunction function)
-    //{
-    //    var gradient = new Vector();
-    //
-    //
-    //
-    //
-    //    foreach (var (x, y) in points)
-    //    {
-    //        var param = new Vector() { x };
-    //        var diff = function.Value(param) - y;
-    //        var derivative = diff > 0 ? 1 : (double)(diff < 0 ? -1 : 0);
-    //        gradient.Add(derivative);
-    //    }
-    //    return gradient;
-    //}
-
     IVector IDifferentiableFunctional.Gradient(IFunction function)
     {
         var gradient = new Vector();
-        if (function is IDifferentiableFunction)
-        {
-            foreach (var (x, y) in points)
-            {
-                var param = new Vector { x };
-                var diffSign = Math.Sign(y - function.Value(param));
-                var gradVec = (function as IDifferentiableFunction)!.Gradient(param);
-                gradient.Add(diffSign);
-            }
-        }
-        return gradient;
-
-
         foreach (var (x, y) in points)
         {
-            var param = new Vector() { x };
-            var diff = function.Value(param) - y;
-            var derivative = diff > 0 ? 1 : (double)(diff < 0 ? -1 : 0);
-            gradient.Add(derivative);
+            var param = new Vector { x };
+            var gradF = (function as IDifferentiableFunction)!.Gradient(param);
+            if (gradient.Count == 0)
+                for (var i = 0; i < gradF.Count; ++i) gradient.Add(0);
+            var sign = Math.Sign(y - function.Value(param));
+            for (var i = 0; i < gradient.Count; ++i) gradient[i] += sign * gradF[i];
         }
         return gradient;
     }

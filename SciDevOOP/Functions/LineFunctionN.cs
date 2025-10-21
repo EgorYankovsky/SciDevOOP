@@ -12,7 +12,7 @@ class LineFunctionN : IParametricFunction
     /// </summary>
     class InternalLineFunctionN : IDifferentiableFunction
     {
-        private double _h = 1e-8;
+        private readonly double _h = 1e-8;
         public IVector? coefficients;
 
         IVector IDifferentiableFunction.Gradient(IVector point)

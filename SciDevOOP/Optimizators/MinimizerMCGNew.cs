@@ -36,9 +36,8 @@ class MinimizerMCGNew : IOptimizator
     private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters, double eps)
     {
         var k = 0;
-        var xCurr = new Vector();
-        foreach (var p in initialParameters) xCurr.Add(p);
-
+        var xCurr = new Vector(initialParameters.Select(p => p));
+        
         var s = new Vector();
         for (var i = 0; i < xCurr.Count; i++) s.Add(0);
 
@@ -47,8 +46,7 @@ class MinimizerMCGNew : IOptimizator
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                var grad = ComputeGradient(objective, function, xCurr);
-                //var grad = (function.Bind(xCurr) as IDifferentiableFunction)!.Gradient(xCurr);
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -62,8 +60,8 @@ class MinimizerMCGNew : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = ComputeGradient(objective, function, xNext);
-            var gradCurr = ComputeGradient(objective, function, xCurr);
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xNext));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -87,30 +85,6 @@ class MinimizerMCGNew : IOptimizator
         }
         Console.WriteLine($"MCG reached max iterations: {k}");
         return xCurr;
-    }
-
-    //[Obsolete(message: "Method should be deleted.", false)]
-    private IVector ComputeGradient(IFunctional objective, IParametricFunction function, IVector x)
-    {
-        var gradient = new Vector();
-
-        var baseFun = function.Bind(x);
-        var baseValue = objective.Value(baseFun);
-
-        for (var i = 0; i < x.Count; i++)
-        {
-            // perturbed vector
-            var perturbed = new Vector();
-            foreach (var p in x) perturbed.Add(p);
-            perturbed[i] += H;
-
-            var perturbedFun = function.Bind(perturbed);
-            double perturbedValue = objective.Value(perturbedFun);
-
-            gradient.Add((perturbedValue - baseValue) / H);
-        }
-
-        return gradient;
     }
 
     private double FindMinLambda(IFunctional objective, IParametricFunction function, IVector x, IVector s)
