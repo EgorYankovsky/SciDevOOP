@@ -18,13 +18,14 @@ class LineFunctionN : IParametricFunction
         IVector IDifferentiableFunction.Gradient(IVector point)
         {
             var gradient = new Vector();
+            var baseValue = (this as IFunction)!.Value(point);
             for (var i = 0; i < coefficients!.Count; ++i)
             {
                 var coefficientsCopy = new Vector(coefficients);
                 // If parameter is too little, we shall find derivative with other way.
-                coefficientsCopy[i] = coefficientsCopy[i] + _h;
+                coefficientsCopy[i] += _h;
                 var f1 = new LineFunctionN().Bind(coefficientsCopy);
-                var derivative = (f1.Value(point) - (this as IFunction).Value(point)) / _h;
+                var derivative = (f1.Value(point) - baseValue) / _h;
                 gradient.Add(derivative);
             }
             return gradient;

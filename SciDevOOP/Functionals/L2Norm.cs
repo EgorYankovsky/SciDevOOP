@@ -1,5 +1,4 @@
-﻿using SciDevOOP.Functions;
-using SciDevOOP.ImmutableInterfaces.Functionals;
+﻿using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
@@ -17,7 +16,7 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
         if (Math.Abs(l2Value) < 1e-15)
         {
-            for (int i = 0; i < points.Count; i++)
+            for (var i = 0; i < points.Count; i++)
                 gradient.Add(0);
             return gradient;
         }
@@ -33,26 +32,21 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
     IMatrix ILeastSquaresFunctional.Jacobian(IFunction function)
     {
-        var jacobian = new Matrix();
+        var Jacobian = new Matrix();
         if (function is IDifferentiableFunction differentiableFunction)
         {
             for (var i = 0; i < points.Count; i++)
             {
                 var input = new Vector { points[i].x };
                 var row = new Vector();
-
-
                 var derivatives = differentiableFunction.Gradient(input);
-
                 // ∂r_i/∂θ_j = ∂f(x_i)/∂θ_j
                 for (var j = 0; j < derivatives.Count; j++)
-                {
                     row.Add(derivatives[j]);
-                }
-                jacobian.Add(row);
+                Jacobian.Add(row);
             }
         }
-        return jacobian;
+        return Jacobian;
     }
 
     IVector ILeastSquaresFunctional.Residual(IFunction function)
@@ -60,11 +54,8 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
         var residuals = new Vector();
         for (var i = 0; i < points.Count; i++)
         {
-            // Create input vector for function.
             var input = new Vector { points[i].x };
-            // Account model's prediction.
             var prediction = function.Value(input);
-            // Residual: prediction - actual
             residuals.Add(prediction - points[i].y);
         }
         return residuals;
@@ -72,7 +63,7 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
     double IFunctional.Value(IFunction function)
     {
-        double sum = 0;
+        var sum = 0.0D;
         foreach (var (x, y) in points)
         {
             var param = new Vector() { x };

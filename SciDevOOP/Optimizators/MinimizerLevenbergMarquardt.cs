@@ -5,8 +5,6 @@ using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.LevenbergMarquardtTools;
 using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
-using System;
-using System.Collections.Generic;
 
 namespace SciDevOOP.Optimizators;
 
@@ -22,21 +20,23 @@ class MinimizerLevenbergMarquardt : IOptimizator
 
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector minimumParameters = null, IVector maximumParameters = null)
     {
+        IVector sln = new Vector();
         try
         {
-            return objective is ILeastSquaresFunctional && objective is IDifferentiableFunctional
-                ? LevenbergMarquardt(objective, function, initialParameters)
-                : throw new ArgumentException();
+            if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
+                throw new ArgumentException();
+                
+             sln = LevenbergMarquardt(objective, function, initialParameters);
         }
         catch (ArgumentException)
         {
-            Console.WriteLine($"MinimizerLevenbergMarquardt can't handle with {objective.GetType().Name} functional class.\n");
+            Console.WriteLine($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
         }
         catch (Exception ex) 
         {
-            Console.WriteLine($"Unexpected exception: {ex}");
+            Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return new Vector();
+        return sln;
     }
 
     private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
@@ -47,34 +47,26 @@ class MinimizerLevenbergMarquardt : IOptimizator
 
         // Account new vector residual and Jacobian.
         var residuals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(x0));
-        
-        //var J = ComputeJacobian(objective, function, x0, residuals.Count);
         var J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(x0)) as IDenseMatrix)!.GetTransposed();
-
-        var costCurr = 0.5 * (residuals as IVectorMultiplicand)!.Multiplicate(residuals); // ComputeCost(residuals);
+        var costCurr = 0.5 * (residuals as IVectorMultiplicand)!.Multiplicate(residuals);
 
         while (k < MaxIterations)
         {
             // Account gradient: J^T * r
             var gradient = (J as IMatrixMultiplicand)!.Multiplicate(residuals);
-            //var gradient = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(x0));
 
             // Check gradient's norm.
             if ((gradient as INormable)!.Norma() < Tolerance) return x0;
 
             // Hessian generation: J^T * J
-            //var JTJ = ComputeHessianApproximation(J, residuals.Count);
             var Jt = (J as IDenseMatrix)!.GetTransposed();
             var JTJ = (J as IMatrixMultiplicand)!.Multiplicate(Jt);
 
 
             // Add regularization parameters
-            //var A = AddLambdaToDiagonal(JTJ, lambda, n);
             for (var i = 0; i < JTJ.Count; ++i) JTJ[i][i] += lambda;
 
-
             // Solve system: (J^T * J + lambda * I) * h = -J^T * r
-            //var h = SolveLinearSystem(JTJ, gradient, -1.0, n);
             if (Solver is null)
             {
                 Console.WriteLine("Cause Solver is null it set immediately as Gauss.");
@@ -107,11 +99,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 x0 = nextX;
                 residuals = nextResidual;
                 costCurr = nextCost;
-
                 // Account Jacobian at new point
-                //J = ComputeJacobian(objective, function, x0, residuals.Count);
                 J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(x0)) as IDenseMatrix)!.GetTransposed();
-
                 // Reduce regularization parameter.
                 lambda = Math.Max(lambda / Nu, 1e-16);
             }
@@ -119,11 +108,9 @@ class MinimizerLevenbergMarquardt : IOptimizator
             {
                 // Failed step - increase regularization parameter.
                 lambda *= Nu;
-
                 // Return if lambda too big.
                 if (lambda > 1e16) return x0;
             }
-            //if (Norm(h) < Tolerance * (1 + Norm(x0))) return x0;
             if ((h as INormable)!.Norma() < Tolerance * (1 + (x0 as INormable)!.Norma())) return x0;
             if (Math.Abs(actualReduction) < Tolerance) return x0;
             k++;
