@@ -1,5 +1,4 @@
-﻿using SciDevOOP.Functions;
-using SciDevOOP.ImmutableInterfaces.Functionals;
+﻿using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
@@ -17,7 +16,7 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
         if (Math.Abs(l2Value) < 1e-15)
         {
-            for (int i = 0; i < points.Count; i++)
+            for (var i = 0; i < points.Count; i++)
                 gradient.Add(0);
             return gradient;
         }
@@ -33,39 +32,21 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
     IMatrix ILeastSquaresFunctional.Jacobian(IFunction function)
     {
-        // Для L2Norm Якобиан - это матрица частных производных невязок по параметрам
-        // Если function параметрическая, нам нужно знать её производные
-
-        var jacobian = new Matrix();
-
-        // Проверяем, поддерживает ли функция вычисление производных
+        var Jacobian = new Matrix();
         if (function is IDifferentiableFunction differentiableFunction)
         {
-            // function имеет методы для вычисления производных
-            for (int i = 0; i < points.Count; i++)
+            for (var i = 0; i < points.Count; i++)
             {
                 var input = new Vector { points[i].x };
                 var row = new Vector();
-
-                // Вычисляем производные функции в точке x_i
                 var derivatives = differentiableFunction.Gradient(input);
-
-                // Для каждой невязки r_i = f(x_i) - y_i
                 // ∂r_i/∂θ_j = ∂f(x_i)/∂θ_j
-                for (int j = 0; j < derivatives.Count; j++)
-                {
+                for (var j = 0; j < derivatives.Count; j++)
                     row.Add(derivatives[j]);
-                }
-                jacobian.Add(row);
+                Jacobian.Add(row);
             }
         }
-        //else
-        //{
-        //    // Численное дифференцирование как запасной вариант
-        //    jacobian = ComputeNumericalJacobianForL2Norm(function);
-        //}
-
-        return jacobian;
+        return Jacobian;
     }
 
     IVector ILeastSquaresFunctional.Residual(IFunction function)
@@ -73,11 +54,8 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
         var residuals = new Vector();
         for (var i = 0; i < points.Count; i++)
         {
-            // Create input vector for function.
             var input = new Vector { points[i].x };
-            // Account model's prediction.
             var prediction = function.Value(input);
-            // Residual: prediction - actual
             residuals.Add(prediction - points[i].y);
         }
         return residuals;
@@ -85,7 +63,7 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
     double IFunctional.Value(IFunction function)
     {
-        double sum = 0;
+        var sum = 0.0D;
         foreach (var (x, y) in points)
         {
             var param = new Vector() { x };
