@@ -27,7 +27,7 @@ return 0;
 */
 
 var optimizer = new MinimizerLevenbergMarquardt();
-var fun = new LineFunction();
+var fun = new LineFunctionN();
 var initial = new Vector { 1.0, 1.0 };
 
 var name = Assembly.GetExecutingAssembly().GetName().Name;

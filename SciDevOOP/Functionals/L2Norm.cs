@@ -33,17 +33,39 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 
     IMatrix ILeastSquaresFunctional.Jacobian(IFunction function)
     {
-        var Jacobian = new Matrix();
-        var baseResidual = (this as ILeastSquaresFunctional).Residual(function);
+        // Для L2Norm Якобиан - это матрица частных производных невязок по параметрам
+        // Если function параметрическая, нам нужно знать её производные
 
+        var jacobian = new Matrix();
 
-
-        for (int j = 0; j < points.Count; ++j)
+        // Проверяем, поддерживает ли функция вычисление производных
+        if (function is IDifferentiableFunction differentiableFunction)
         {
-            var perturbed = new Vector();
-        }
+            // function имеет методы для вычисления производных
+            for (int i = 0; i < points.Count; i++)
+            {
+                var input = new Vector { points[i].x };
+                var row = new Vector();
 
-        return Jacobian;
+                // Вычисляем производные функции в точке x_i
+                var derivatives = differentiableFunction.Gradient(input);
+
+                // Для каждой невязки r_i = f(x_i) - y_i
+                // ∂r_i/∂θ_j = ∂f(x_i)/∂θ_j
+                for (int j = 0; j < derivatives.Count; j++)
+                {
+                    row.Add(derivatives[j]);
+                }
+                jacobian.Add(row);
+            }
+        }
+        //else
+        //{
+        //    // Численное дифференцирование как запасной вариант
+        //    jacobian = ComputeNumericalJacobianForL2Norm(function);
+        //}
+
+        return jacobian;
     }
 
     IVector ILeastSquaresFunctional.Residual(IFunction function)
