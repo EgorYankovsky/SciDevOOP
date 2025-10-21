@@ -12,10 +12,23 @@ class LineFunctionN : IParametricFunction
     /// </summary>
     class InternalLineFunctionN : IDifferentiableFunction
     {
+        private double _h = 1e-8;
         public IVector? coefficients;
 
         IVector IDifferentiableFunction.Gradient(IVector point)
-            => (Vector)coefficients!.Skip(1).ToList();
+        {
+            var gradient = new Vector();
+            for (var i = 0; i < coefficients!.Count; ++i)
+            {
+                var coefficientsCopy = new Vector(coefficients);
+                // If parameter is too little, we shall find derivative with other way.
+                coefficientsCopy[i] = coefficientsCopy[i] + _h;
+                var f1 = new LineFunctionN().Bind(coefficientsCopy);
+                var derivative = (f1.Value(point) - (this as IFunction).Value(point)) / _h;
+                gradient.Add(derivative);
+            }
+            return gradient;
+        }
 
         double IFunction.Value(IVector point)
         {

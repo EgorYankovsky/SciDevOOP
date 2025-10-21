@@ -30,7 +30,11 @@ class MinimizerLevenbergMarquardt : IOptimizator
         }
         catch (ArgumentException)
         {
-            Console.WriteLine($"MinimizerLevenbergMarquardt can't handle with {objective.GetType().Name} functional class.");
+            Console.WriteLine($"MinimizerLevenbergMarquardt can't handle with {objective.GetType().Name} functional class.\n");
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine($"Unexpected exception: {ex}");
         }
         return new Vector();
     }
@@ -44,7 +48,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
         // Account new vector residual and Jacobian.
         var residuals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(x0));
         
-        var J = ComputeJacobian(objective, function, x0, residuals.Count);
+        //var J = ComputeJacobian(objective, function, x0, residuals.Count);
+        var J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(x0)) as IDenseMatrix)!.GetTransposed();
 
         var costCurr = 0.5 * (residuals as IVectorMultiplicand)!.Multiplicate(residuals); // ComputeCost(residuals);
 
@@ -104,7 +109,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 costCurr = nextCost;
 
                 // Account Jacobian at new point
-                J = ComputeJacobian(objective, function, x0, residuals.Count);
+                //J = ComputeJacobian(objective, function, x0, residuals.Count);
+                J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(x0)) as IDenseMatrix)!.GetTransposed();
 
                 // Reduce regularization parameter.
                 lambda = Math.Max(lambda / Nu, 1e-16);
@@ -125,80 +131,6 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return x0;
     }
 
-    private IMatrix ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
-    {
-        // Если функционал реализует ILeastSquaresFunctional, используем его встроенный метод Jacobian
-        if (objective is ILeastSquaresFunctional leastSquaresFunctional)
-        {
-            var boundFunction = function.Bind(parameters);
-            return leastSquaresFunctional.Jacobian(boundFunction);
-        }
-
-        // Иначе используем численное дифференцирование (резервный вариант)
-        return ComputeNumericalJacobian(objective, function, parameters, dataCount);
-    }
-
-    private IMatrix ComputeNumericalJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
-    {
-        var n = parameters.Count;
-        var m = dataCount;
-        var jacobian = new Matrix(n, m);
-
-        // Базовые невязки
-        var baseResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(parameters));
-
-        for (var j = 0; j < n; j++)
-        {
-            // Вектор возмущений для j-го параметра
-            var perturbed = new Vector();
-            for (var k = 0; k < n; k++)
-                perturbed.Add(parameters[k]);
-            perturbed[j] += H;
-
-            // Невязки с возмущениями
-            var perturbedResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(perturbed));
-
-            // Вычисляем производные по j-му параметру
-            for (var i = 0; i < m; i++)
-            {
-                var derivative = (perturbedResiduals[i] - baseResiduals[i]) / H;
-                jacobian[j][i] = derivative;
-            }
-        }
-        return jacobian;
-    }
-
-    //private IMatrix ComputeJacobian(IFunctional objective, IParametricFunction function, IVector parameters, int dataCount)
-    //{
-    //    // Jacobian: residual's derivatives by parameters.
-    //    var n = parameters.Count; // Parameters amount.
-    //    var m = dataCount;        // Data points amount.
-
-    //    var jacobian = new Matrix(n, m);
-
-    //    // Basic residuals.
-    //    var baseResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(parameters));
-
-    //    for (var j = 0; j < n; j++)
-    //    {
-    //        // Perturbations vector for j-th parameter.
-    //        var perturbed = new Vector();
-    //        for (var k = 0; k < n; k++)
-    //            perturbed.Add(parameters[k]);
-    //        perturbed[j] += H;
-
-    //        // Residuals with perturbations.
-    //        var perturbedResiduals = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(perturbed));
-
-    //        // Account derivatives by j-th parameter.
-    //        for (var i = 0; i < m; i++)
-    //        {
-    //            var derivative = (perturbedResiduals[i] - baseResiduals[i]) / H;
-    //            jacobian[j][i] = derivative;
-    //        }
-    //    }
-    //    return jacobian;
-    //}
 
     private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {

@@ -5,8 +5,8 @@ namespace SciDevOOP.MathematicalObjects;
 
 public class Matrix : List<IList<double>>, IDenseMatrix, IMatrixMultiplicand
 {
-    public int N { get; init; } 
-    public int M { get; init; }
+    public int N => Count;
+    public int M => this[0].Count;
     
     //public double this[int i, int j]
     //{
@@ -65,11 +65,11 @@ public class Matrix : List<IList<double>>, IDenseMatrix, IMatrixMultiplicand
 
     public Matrix(int n, int m)
     {
-        (N, M) = (n, m);
-        for (var i = 0; i < N; ++i)
+        //(N, M) = (n, m);
+        for (var i = 0; i < n; ++i)
         {
             Add([]);
-            for (var j = 0; j < M; ++j)
+            for (var j = 0; j < m; ++j)
                 base[i].Add(0);
         }
     }
