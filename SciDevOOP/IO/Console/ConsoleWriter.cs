@@ -2,8 +2,9 @@ namespace SciDevOOP.IO.Console;
 
 public class ConsoleWriter : IWriter
 {
-    public void Write()
+    public void Write(IList<double> values)
     {
-        throw new NotImplementedException();
+        foreach (var value in values)
+            System.Console.WriteLine(value);
     }
 }

@@ -15,8 +15,6 @@ public class TxtReader : IReader
 
     private readonly FileInfo? _file;
 
-    public string? Path { get; init; }
-
     public TxtReader(string path)
     {
         _file = path.Split('\\').Length == 1 ? new FileInfo(_basePath + path) : new FileInfo(path);

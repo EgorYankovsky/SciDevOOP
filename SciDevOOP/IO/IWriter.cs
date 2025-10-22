@@ -2,5 +2,5 @@ namespace SciDevOOP.IO;
 
 interface IWriter
 {
-    void Write();
+    void Write(IList<double> values);
 }

@@ -5,13 +5,9 @@ using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
 using SciDevOOP.IO;
-using System.Reflection;
-using System.Text;
-
 using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
 using SciDevOOP.IO.Txt;
 using SciDevOOP.IO.Console;
-using System.Net.Http.Headers;
 
 var points = Read("input.txt");
 
@@ -21,7 +17,7 @@ var initial = new Vector { 1.0, 1.0 };
 
 var functional = new L1Norm { points = points };
 var res = optimizer.Minimize(functional, fun, initial);
-foreach (var r in res) Console.WriteLine(r);
+Write(res);
 
 static IList<IList<double>>? Read(string? path = null)
 {
@@ -65,4 +61,51 @@ static IList<IList<double>>? Read(string? path = null)
         Console.WriteLine($"Unexpected exception:\n{ex}.");
     }
     return null;
+}
+
+static void Write(IList<double> answer, string? path = null)
+{
+    var extension = string.Empty;
+    IWriter? writer = null;
+    try
+    {
+        if (path is not null)
+        {
+            extension = path.Split('\\').Last().Split('.').Last().ToLower();
+            writer = extension switch
+            {
+                "txt" => new TxtWriter(path),
+                _ => throw new ArgumentException()
+            };
+        }
+        else
+        {
+            writer = new ConsoleWriter();
+        }
+        writer!.Write(answer);
+    }
+    catch (NotSupportedException nsEx)
+    {
+        Console.WriteLine(nsEx.Message);
+    }
+    catch (FileNotFoundException ex)
+    {
+        Console.WriteLine($"Can't find file: {ex.Message}.");
+    }
+    catch (InvalidDataException idEx)
+    {
+        Console.WriteLine($"String {idEx.Message} wasn't in a correct format.\n{idEx}.");
+    }
+    catch (FormatException fEx)
+    {
+        Console.WriteLine($"Format exception during {writer!.GetType()} work.\n{fEx.Message}.");
+    }
+    catch (ArgumentException)
+    {
+        Console.WriteLine($"Unexpected file extension: {extension}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Unexpected exception:\n{ex}.");
+    }
 }
