@@ -8,8 +8,7 @@ public class ConsoleReader : IReader
         result = [];
         var input = System.Console.ReadLine();
         var isOK = int.TryParse(input, out var pointsAmount);
-        if (!isOK)
-            throw new FormatException($"Can't convert {input} to int");
+        if (!isOK) throw new FormatException($"Can't convert {input} to int");
         for (var i = 0; i < pointsAmount; ++i)
         {
             input = System.Console.ReadLine();

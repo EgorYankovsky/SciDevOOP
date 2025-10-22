@@ -9,22 +9,22 @@ namespace SciDevOOP.Optimizators;
 
 class MinimizerMCG : IOptimizator
 {
-    public int MaxIter = 100000;
+    public int MaxIterations = 100000;
     public double Tolerance = 1e-15;
     public double H = 1e-15; // For gradient.
 
-    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector minimumParameters = null, IVector maximumParameters = null)
+    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
         try
         {
-            if (objective is not IDifferentiableFunctional)
-                throw new ArgumentException();
+            if (objective is not IDifferentiableFunctional) throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+            if (function is not IDifferentiableFunction) throw new ArgumentException($"MCG minimizer can't handle with {function.GetType().Name} function class.");
             sln = Method(objective, function, initialParameters, 1e-15);
         }
-        catch (ArgumentException)
+        catch (ArgumentException argEx)
         {
-            Console.WriteLine($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+            Console.WriteLine(argEx.Message);
         }
         catch (Exception ex)
         {
@@ -41,7 +41,7 @@ class MinimizerMCG : IOptimizator
         var s = new Vector();
         for (var i = 0; i < xCurr.Count; i++) s.Add(0);
 
-        while (k < MaxIter)
+        while (k < MaxIterations)
         {
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)

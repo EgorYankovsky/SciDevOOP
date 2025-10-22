@@ -9,14 +9,25 @@ using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
 using SciDevOOP.IO.Txt;
 using SciDevOOP.IO.Console;
 
-var points = Read("input.txt");
+/*
+ * Read support console and TXT input.
+ *  - to use console input use as: Read()
+ *  - to use txt input use as: Read("file_name.txt")
+ *  
+ *  Write support console and TXT output.
+ *  - to use console output use as: Write(res)
+ *  - to use txt input use as: Read(res, "file_name.txt")
+ */
 
+var points = Read("input.txt");
 var optimizer = new MinimizerMCG();
 var fun = new LineFunctionN();
 var initial = new Vector { 1.0, 1.0 };
-
+//var minimal = new Vector { 1.0, 1.0 };
+//var maximal = new Vector { 1.0, 1.0 };
 var functional = new L1Norm { points = points };
 var res = optimizer.Minimize(functional, fun, initial);
+//var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
 Write(res);
 
 static IList<IList<double>>? Read(string? path = null)

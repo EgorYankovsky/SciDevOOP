@@ -17,20 +17,20 @@ class MinimizerLevenbergMarquardt : IOptimizator
     public double H = 1e-8; // Step for numerical derivatives.
     public ISolver? Solver;
 
-
-    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector minimumParameters = null, IVector maximumParameters = null)
+    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
         try
         {
             if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
-                throw new ArgumentException();
-                
-             sln = LevenbergMarquardt(objective, function, initialParameters);
+                throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
+            if (function is not IDifferentiableFunction)
+                throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {function.GetType().Name} function class.");
+            sln = LevenbergMarquardt(objective, function, initialParameters);
         }
-        catch (ArgumentException)
+        catch (ArgumentException argEx)
         {
-            Console.WriteLine($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
+            Console.WriteLine(argEx.Message);
         }
         catch (Exception ex) 
         {
@@ -39,7 +39,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return sln;
     }
 
-    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
+    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0, IVector? minimal = null, IVector? maximal = null)
     {
         var n = x0.Count;
         var lambda = LambdaInit;

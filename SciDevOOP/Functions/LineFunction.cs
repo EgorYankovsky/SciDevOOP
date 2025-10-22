@@ -5,6 +5,10 @@ namespace SciDevOOP.Functions;
 
 class LineFunction : IParametricFunction
 {
+    /// <summary>
+    /// Represents a line function of the form:
+    /// y = ax + b.
+    /// </summary>
     class InternalLineFunction : IFunction
     {
         public double a, b;
