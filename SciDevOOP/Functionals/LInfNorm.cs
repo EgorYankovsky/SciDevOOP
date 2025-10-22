@@ -6,17 +6,18 @@ namespace SciDevOOP.Functionals;
 
 class LInfNorm : IFunctional
 {
-    public List<(double x, double y)> points;
+    public IList<IList<double>>? points;
 
     double IFunctional.Value(IFunction function)
     {
+        if (points is null) throw new ArgumentNullException("Points is null at LInfNorm");
         double max = 0;
-        foreach (var (x, y) in points)
+        foreach (var point in points)
         {
-            var param = new Vector() { x };
-            var diff = Math.Abs(function.Value(param) - y);
-            if (diff > max)
-                max = diff;
+            var fi = point.Last();
+            var param = new Vector(point.SkipLast(1));
+            var diff = Math.Abs(function.Value(param) - fi);
+            if (diff > max) max = diff;
         }
         return max;
     }

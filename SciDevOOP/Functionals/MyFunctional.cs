@@ -6,14 +6,17 @@ namespace SciDevOOP.Functionals;
 
 class MyFunctional : IFunctional
 {
-    public List<(double x, double y)> points;
+    public IList<IList<double>>? points;
+
     public double Value(IFunction function)
     {
+        if (points == null) throw new ArgumentNullException("Points is null at MyFunctional");
         double sum = 0;
-        foreach (var (x, y) in points)
+        foreach (var point in points)
         {
-            var param = new Vector() { x };
-            var s = function.Value(param) - y;
+            var fi = point.Last();
+            var param = new Vector(point.SkipLast(1));
+            var s = function.Value(param) - fi;
             sum += s * s;
         }
         return sum;

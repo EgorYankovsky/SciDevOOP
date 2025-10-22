@@ -6,9 +6,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-    <ItemGroup>
-        <EmbeddedResource Include="Resources\input.txt" />
-        <EmbeddedResource Include="Resources\input1.txt" />
-        <EmbeddedResource Include="Resources\input2.txt" />
-    </ItemGroup>    
 </Project>
