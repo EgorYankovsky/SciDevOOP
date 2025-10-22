@@ -13,7 +13,8 @@ using SciDevOOP.IO.Txt;
 using SciDevOOP.IO.Console;
 using System.Net.Http.Headers;
 
-var data = Read("input.txt");
+//var data = Read("input.txt");
+var data = Read();
 
 return 0;
 
@@ -65,6 +66,10 @@ static IList<IList<double>>? Read(string? path = null)
     catch (InvalidDataException idEx)
     {
         Console.WriteLine($"String {idEx.Message} wasn't in a correct format.\n{idEx}.");
+    }
+    catch (FormatException fEx)
+    {
+        Console.WriteLine($"Format exception during {reader!.GetType()} work.\n{fEx.Message}.");
     }
     catch (ArgumentException)
     {
