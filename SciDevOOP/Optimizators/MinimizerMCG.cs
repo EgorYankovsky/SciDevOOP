@@ -36,9 +36,8 @@ class MinimizerMCG : IOptimizator
     private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters, double eps)
     {
         var k = 0;
-        var xCurr = new Vector();
-        foreach (var p in initialParameters) xCurr.Add(p);
-
+        var xCurr = new Vector(initialParameters.Select(p => p));
+        
         var s = new Vector();
         for (var i = 0; i < xCurr.Count; i++) s.Add(0);
 
@@ -47,8 +46,7 @@ class MinimizerMCG : IOptimizator
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                //var grad = ComputeGradient(objective, function, xCurr);
-                var grad = (function.Bind(xCurr) as IDifferentiableFunction)!.Gradient(xCurr);
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -62,8 +60,8 @@ class MinimizerMCG : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = ComputeGradient(objective, function, xNext);
-            var gradCurr = ComputeGradient(objective, function, xCurr);
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xNext));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -72,43 +70,21 @@ class MinimizerMCG : IOptimizator
                 s[i] = -gradNext[i] + w * s[i];
 
             var sNorm = (s as INormable)!.Norma();
-            if (sNorm < eps)
+            var xDiff = new Vector();
+            for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
+            var xDiffNorm = xDiff.Norma();
+            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
+            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+            if (sNorm < eps || xDiffNorm < eps)
             {
-                Console.WriteLine($"{k} MCG answer found");
+                Console.WriteLine($"MCG answer found for {k} iterations.");
                 return xNext;
             }
             xCurr = xNext;
             k++;
-            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
-            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
         }
         Console.WriteLine($"MCG reached max iterations: {k}");
         return xCurr;
-    }
-
-    //[Obsolete(message: "Method should be deleted.", false)]
-    private IVector ComputeGradient(IFunctional objective, IParametricFunction function, IVector x)
-    {
-        var gradient = new Vector();
-
-        // Базовое значение функции
-        var baseFun = function.Bind(x);
-        double baseValue = objective.Value(baseFun);
-
-        for (int i = 0; i < x.Count; i++)
-        {
-            // perturbed vector
-            var perturbed = new Vector();
-            foreach (var p in x) perturbed.Add(p);
-            perturbed[i] += H;
-
-            var perturbedFun = function.Bind(perturbed);
-            double perturbedValue = objective.Value(perturbedFun);
-
-            gradient.Add((perturbedValue - baseValue) / H);
-        }
-
-        return gradient;
     }
 
     private double FindMinLambda(IFunctional objective, IParametricFunction function, IVector x, IVector s)
@@ -119,13 +95,12 @@ class MinimizerMCG : IOptimizator
 
     private (double, double) FindMinimum(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda0 = 0.0)
     {
-        double h = 0;
-        double lambda = lambda0;
-        double delta = 1e-8;
+        var delta = 1e-8;
+        var f_lambda0 = EvaluateFunction(objective, function, x, s, lambda0);
+        var f_lambda_delta = EvaluateFunction(objective, function, x, s, lambda0 + delta);
 
-        double f_lambda0 = EvaluateFunction(objective, function, x, s, lambda0);
-        double f_lambda_delta = EvaluateFunction(objective, function, x, s, lambda0 + delta);
-
+        double lambda;
+        double h;
         if (f_lambda0 > f_lambda_delta)
         {
             lambda = lambda0 + delta;
@@ -136,61 +111,42 @@ class MinimizerMCG : IOptimizator
             lambda = lambda0 + delta;
             h = -delta;
         }
-        else
-        {
-            return (lambda0, lambda0);
-        }
+        else return (lambda0, lambda0);
 
         while (true)
         {
             h *= 2;
             lambda += h;
-
-            double f_prev = EvaluateFunction(objective, function, x, s, lambda - h);
-            double f_curr = EvaluateFunction(objective, function, x, s, lambda);
-
+            var f_prev = EvaluateFunction(objective, function, x, s, lambda - h);
+            var f_curr = EvaluateFunction(objective, function, x, s, lambda);
             if (f_prev <= f_curr)
-            {
                 return (Math.Min(lambda0, lambda - h), Math.Max(lambda0, lambda));
-            }
         }
     }
 
     private double DichotomyMethod(IFunctional objective, IParametricFunction function, (double, double) interval, IVector x, IVector s, double eps = 1e-7)
     {
-        double a = interval.Item1;
-        double b = interval.Item2;
-        double x1 = (a + b - 0.5 * eps) / 2;
-        double x2 = (a + b + 0.5 * eps) / 2;
-
+        var a = interval.Item1;
+        var b = interval.Item2;
+        var x1 = 0.5 * (a + b - 0.5 * eps);
+        var x2 = 0.5 * (a + b + 0.5 * eps);
         while (Math.Abs(b - a) > eps)
         {
-            double f_x1 = EvaluateFunction(objective, function, x, s, x1);
-            double f_x2 = EvaluateFunction(objective, function, x, s, x2);
-
-            if (f_x1 <= f_x2)
-            {
-                b = x2;
-            }
-            else
-            {
-                a = x1;
-            }
-
+            var f_x1 = EvaluateFunction(objective, function, x, s, x1);
+            var f_x2 = EvaluateFunction(objective, function, x, s, x2);
+            if (f_x1 <= f_x2) b = x2;
+            else a = x1;
             x1 = (a + b - 0.5 * eps) / 2;
             x2 = (a + b + 0.5 * eps) / 2;
         }
-
         return 0.5 * (x1 + x2);
     }
 
-    [Obsolete(message: "Method should be deleted.", false)]
     private double EvaluateFunction(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda)
     {
         var point = new Vector();
-        for (int i = 0; i < x.Count; i++)
+        for (var i = 0; i < x.Count; i++)
             point.Add(x[i] + lambda * s[i]);
-
         var fun = function.Bind(point);
         return objective.Value(fun);
     }
