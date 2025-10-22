@@ -9,7 +9,7 @@ namespace SciDevOOP.Optimizators;
 
 class MinimizerMCG : IOptimizator
 {
-    public int MaxIterations = 100000;
+    public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
     public double H = 1e-15; // For gradient.
 
@@ -19,7 +19,7 @@ class MinimizerMCG : IOptimizator
         try
         {
             if (objective is not IDifferentiableFunctional) throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
-            sln = Method(objective, function, initialParameters, 1e-15);
+            sln = Method(objective, function, initialParameters);
         }
         catch (ArgumentException argEx)
         {
@@ -32,7 +32,7 @@ class MinimizerMCG : IOptimizator
         return sln;
     }
 
-    private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters, double eps)
+    private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         var k = 0;
         var xCurr = new Vector(initialParameters.Select(p => p));
@@ -72,9 +72,9 @@ class MinimizerMCG : IOptimizator
             var xDiff = new Vector();
             for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
             var xDiffNorm = xDiff.Norma();
-            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
-            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
-            if (sNorm < eps || xDiffNorm < eps)
+            //if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
+            //if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+            if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
                 Console.WriteLine($"MCG answer found for {k} iterations.");
                 return xNext;
