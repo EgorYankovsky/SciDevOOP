@@ -7,6 +7,8 @@ namespace SciDevOOP.Functionals;
 class IntegrationNorm : IFunctional
 {
     public List<(double x, double y)> points; // Mesh for numerical integration.
+    //public IList<IList<double>> points; // Mesh for numerical integration.
+
     public double LowerBound { get; set; }
     public double UpperBound { get; set; }
     public int NumberOfPoints { get; set; } = 1000;
