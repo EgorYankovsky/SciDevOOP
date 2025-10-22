@@ -3,15 +3,23 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
-using System;
+using SciDevOOP.Optimizators.GradientableAlgorithmTools;
+using SciDevOOP.Optimizators.GradientableAlgorithmTools.LimitingMethods;
 
 namespace SciDevOOP.Optimizators;
 
 class MinimizerMCG : IOptimizator
 {
+    private IVector? _minimumParameters;
+    private IVector? _maximumParameters;
+
+
     public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
+    public double DichotomyEps = 1e-7;
     public double H = 1e-15; // For gradient.
+
+    public ILimitingMethod? LimitingMethod;
 
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
@@ -19,6 +27,7 @@ class MinimizerMCG : IOptimizator
         try
         {
             if (objective is not IDifferentiableFunctional) throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+            (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = Method(objective, function, initialParameters);
         }
         catch (ArgumentException argEx)
@@ -32,13 +41,11 @@ class MinimizerMCG : IOptimizator
         return sln;
     }
 
-    private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
+    private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters)
     {
         var k = 0;
-        var xCurr = new Vector(initialParameters.Select(p => p));
-        
-        var s = new Vector();
-        for (var i = 0; i < xCurr.Count; i++) s.Add(0);
+        var xCurr = new Vector(initialParameters.Select(p => p));        
+        var s = new Vector([..initialParameters.Select(p => 0)]);
 
         while (k < MaxIterations)
         {
@@ -123,20 +130,16 @@ class MinimizerMCG : IOptimizator
         }
     }
 
-    private double DichotomyMethod(IFunctional objective, IParametricFunction function, (double, double) interval, IVector x, IVector s, double eps = 1e-7)
+    private double DichotomyMethod(IFunctional objective, IParametricFunction function, (double, double) interval, IVector x, IVector s)
     {
-        var a = interval.Item1;
-        var b = interval.Item2;
-        var x1 = 0.5 * (a + b - 0.5 * eps);
-        var x2 = 0.5 * (a + b + 0.5 * eps);
-        while (Math.Abs(b - a) > eps)
+        (var a, var b) = (interval.Item1, interval.Item2);
+        (var x1, var x2) = (0.5 * (a + b - 0.5 * DichotomyEps), 0.5 * (a + b + 0.5 * DichotomyEps));
+        while (Math.Abs(b - a) > DichotomyEps)
         {
-            var f_x1 = EvaluateFunction(objective, function, x, s, x1);
-            var f_x2 = EvaluateFunction(objective, function, x, s, x2);
+            (var f_x1, var f_x2) = (EvaluateFunction(objective, function, x, s, x1), EvaluateFunction(objective, function, x, s, x2));
             if (f_x1 <= f_x2) b = x2;
             else a = x1;
-            x1 = (a + b - 0.5 * eps) / 2;
-            x2 = (a + b + 0.5 * eps) / 2;
+            (x1, x2) = (0.5 * (a + b - 0.5 * DichotomyEps), 0.5 * (a + b + 0.5 * DichotomyEps));
         }
         return 0.5 * (x1 + x2);
     }
@@ -147,6 +150,9 @@ class MinimizerMCG : IOptimizator
         for (var i = 0; i < x.Count; i++)
             point.Add(x[i] + lambda * s[i]);
         var fun = function.Bind(point);
-        return objective.Value(fun);
+        var value = objective.Value(fun);
+        LimitingMethod ??= new PenaltyMethod();
+        LimitingMethod.Limit(ref value, point, _minimumParameters, _maximumParameters);
+        return value;
     }
 }

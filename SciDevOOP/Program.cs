@@ -30,7 +30,7 @@ partial class Program
         var initial = new Vector { 1.0, 1.0 };
         var minimal = new Vector { -5.0, -5.0 };
         var maximal = new Vector { 5.0, 5.0 };
-        var functional = new MyFunctional { points = points };
+        var functional = new L1Norm { points = points };
         //var res = optimizer.Minimize(functional, fun, initial);
         var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
         Write(res);
