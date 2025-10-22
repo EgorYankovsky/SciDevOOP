@@ -12,6 +12,8 @@ class MinimizerMonteCarlo : IOptimizator
 
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
+        minimumParameters ??= new Vector([.. initialParameters.Select(v => 0)]);
+        maximumParameters ??= new Vector([.. initialParameters.Select(v => 1)]);
         var param = new Vector([.. initialParameters.Select(p => p)]);
         var minParam = new Vector([.. initialParameters.Select(p => p)]);
 
@@ -22,7 +24,7 @@ class MinimizerMonteCarlo : IOptimizator
 
         for (var i = 0; i < MaxIterations; i++)
         {
-            for (var j = 0; j < param.Count; j++) param[j] = rand.NextDouble();
+            for (var j = 0; j < param.Count; j++) param[j] = minimumParameters[j] + (maximumParameters[j] - minimumParameters[j]) * rand.NextDouble();
             var f = objective.Value(function.Bind(param));
             if (f < currentMin)
             {

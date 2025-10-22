@@ -3,8 +3,6 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
-using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
-using SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools;
 
 namespace SciDevOOP.Optimizators;
@@ -21,6 +19,8 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
 
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
+        minimumParameters ??= new Vector([.. initialParameters.Select(v => 0)]);
+        maximumParameters ??= new Vector([.. initialParameters.Select(v => 1)]);
         var parameters = new Vector([.. initialParameters.Select(v => v)]);
         var minParameters = new Vector([.. initialParameters.Select(v => v)]);
         var f = function.Bind(parameters);
@@ -38,7 +38,7 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
                 for (var ii = 0; ii < parameters.Count; ++ii)
                 {
                     var sign = Math.Pow(-1, rnd.Next(2));
-                    parameters[ii] = minParameters[ii] + sign * rnd.NextDouble();
+                    parameters[ii] = minParameters[ii] + sign * (minimumParameters[ii] + (maximumParameters[ii] - minimumParameters[ii]) * rnd.NextDouble());
                 }
 
                 var newFunctionalValue = objective.Value(function.Bind(parameters));
