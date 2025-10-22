@@ -19,7 +19,6 @@ class MinimizerMCG : IOptimizator
         try
         {
             if (objective is not IDifferentiableFunctional) throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
-            if (function is not IDifferentiableFunction) throw new ArgumentException($"MCG minimizer can't handle with {function.GetType().Name} function class.");
             sln = Method(objective, function, initialParameters, 1e-15);
         }
         catch (ArgumentException argEx)

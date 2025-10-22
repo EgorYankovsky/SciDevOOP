@@ -24,8 +24,6 @@ class MinimizerLevenbergMarquardt : IOptimizator
         {
             if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
-            if (function is not IDifferentiableFunction)
-                throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {function.GetType().Name} function class.");
             sln = LevenbergMarquardt(objective, function, initialParameters);
         }
         catch (ArgumentException argEx)
