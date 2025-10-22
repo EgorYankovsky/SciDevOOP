@@ -9,8 +9,8 @@ class IntegrationNorm : IFunctional
     public List<(double x, double y)> points; // Mesh for numerical integration.
     //public IList<IList<double>> points; // Mesh for numerical integration.
 
-    public double LowerBound { get; set; }
-    public double UpperBound { get; set; }
+    public double LowerBound { get; set; }  // Shouldn't be here.
+    public double UpperBound { get; set; }  // Shouldn't be here.
     public int NumberOfPoints { get; set; } = 1000;
 
     public IntegrationNorm(double lowerBound, double upperBound, int numberOfPoints = 1000)
@@ -26,6 +26,14 @@ class IntegrationNorm : IFunctional
         return Math.Sqrt(integral);
     }
 
+    /// <summary>
+    /// Simpson's integration method.
+    /// </summary>
+    /// <param name="function">Function that will be integrated.</param>
+    /// <param name="a">Integration range from</param>
+    /// <param name="b">Integration range to</param>
+    /// <param name="n">Mesh points amount</param>
+    /// <returns>Calculated integral.</returns>
     private double SimpsonIntegration(IFunction function, double a, double b, int n)
     {
         if (n % 2 == 1) n++;

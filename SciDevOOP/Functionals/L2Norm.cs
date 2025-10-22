@@ -7,7 +7,6 @@ namespace SciDevOOP.Functionals;
 
 class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
 {
-    //public List<(double x, double y)> points;
     public IList<IList<double>>? points;
 
     IVector IDifferentiableFunctional.Gradient(IFunction function)
