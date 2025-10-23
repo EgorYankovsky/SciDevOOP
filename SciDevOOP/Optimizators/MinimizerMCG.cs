@@ -3,24 +3,37 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
-using System;
+using SciDevOOP.Optimizators.GradientableAlgorithmTools;
+using SciDevOOP.Optimizators.GradientableAlgorithmTools.LimitingMethods;
 
 namespace SciDevOOP.Optimizators;
 
 class MinimizerMCG : IOptimizator
 {
-    public int MaxIter = 100000;
+    private IVector? _minimumParameters;
+    private IVector? _maximumParameters;
+
+
+    public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
+    public double DichotomyEps = 1e-7;
     public double H = 1e-15; // For gradient.
 
-    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector minimumParameters = null, IVector maximumParameters = null)
+    public ILimitingMethod? LimitingMethod;
+
+    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
         try
         {
-            if (objective is not IDifferentiableFunctional)
-                throw new ArgumentException();
-            sln = Method(objective, function, initialParameters, 1e-15);
+            if (minimumParameters is not null && initialParameters.Count != minimumParameters.Count)
+                throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (maximumParameters is not null && initialParameters.Count != maximumParameters.Count)
+                throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (objective is not IDifferentiableFunctional) 
+                throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+            (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
+            sln = Method(objective, function, initialParameters);
         }
         catch (ArgumentException)
         {
@@ -33,14 +46,11 @@ class MinimizerMCG : IOptimizator
         return sln;
     }
 
-    private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters, double eps)
+    private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters)
     {
         var k = 0;
-        var xCurr = new Vector();
-        foreach (var p in initialParameters) xCurr.Add(p);
-
-        var s = new Vector();
-        for (var i = 0; i < xCurr.Count; i++) s.Add(0);
+        var xCurr = new Vector(initialParameters.Select(p => p));        
+        var s = new Vector([..initialParameters.Select(p => 0)]);
 
         while (k < MaxIter)
         {
@@ -72,10 +82,26 @@ class MinimizerMCG : IOptimizator
                 s[i] = -gradNext[i] + w * s[i];
 
             var sNorm = (s as INormable)!.Norma();
-            if (sNorm < eps)
+            var xDiff = new Vector();
+            for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
+            var xDiffNorm = xDiff.Norma();
+            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
+            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+            if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
-                Console.WriteLine($"{k} MCG answer found");
-                return xNext;
+                var a = 0; var b = 0;
+                if (_minimumParameters is not null)
+                    for (var i = 0; i < _minimumParameters.Count; ++i)
+                        a += _minimumParameters[i] < xNext[i] ? 0 : 1;
+                if (_maximumParameters is not null)
+                    for (var i = 0; i < _maximumParameters.Count; ++i)
+                        b += _maximumParameters[i] > xNext[i] ? 0 : 1;
+
+                if (a + b == 0)
+                {
+                    Console.WriteLine($"MCG answer found for {k} iterations.");
+                    return xNext;
+                }
             }
             xCurr = xNext;
             k++;
@@ -141,44 +167,27 @@ class MinimizerMCG : IOptimizator
             return (lambda0, lambda0);
         }
 
-        while (true)
+        for (var i = 0; i < 1000; ++i)
         {
             h *= 2;
             lambda += h;
-
-            double f_prev = EvaluateFunction(objective, function, x, s, lambda - h);
-            double f_curr = EvaluateFunction(objective, function, x, s, lambda);
-
-            if (f_prev <= f_curr)
-            {
-                return (Math.Min(lambda0, lambda - h), Math.Max(lambda0, lambda));
-            }
+            var f_prev = EvaluateFunction(objective, function, x, s, lambda - h);
+            var f_curr = EvaluateFunction(objective, function, x, s, lambda);
+            if (f_prev <= f_curr) break;
         }
+        return (Math.Min(lambda0, lambda - h), Math.Max(lambda0, lambda));
     }
 
-    private double DichotomyMethod(IFunctional objective, IParametricFunction function, (double, double) interval, IVector x, IVector s, double eps = 1e-7)
+    private double DichotomyMethod(IFunctional objective, IParametricFunction function, (double, double) interval, IVector x, IVector s)
     {
-        double a = interval.Item1;
-        double b = interval.Item2;
-        double x1 = (a + b - 0.5 * eps) / 2;
-        double x2 = (a + b + 0.5 * eps) / 2;
-
-        while (Math.Abs(b - a) > eps)
+        (var a, var b) = (interval.Item1, interval.Item2);
+        (var x1, var x2) = (0.5 * (a + b - 0.5 * DichotomyEps), 0.5 * (a + b + 0.5 * DichotomyEps));
+        while (Math.Abs(b - a) > DichotomyEps)
         {
-            double f_x1 = EvaluateFunction(objective, function, x, s, x1);
-            double f_x2 = EvaluateFunction(objective, function, x, s, x2);
-
-            if (f_x1 <= f_x2)
-            {
-                b = x2;
-            }
-            else
-            {
-                a = x1;
-            }
-
-            x1 = (a + b - 0.5 * eps) / 2;
-            x2 = (a + b + 0.5 * eps) / 2;
+            (var f_x1, var f_x2) = (EvaluateFunction(objective, function, x, s, x1), EvaluateFunction(objective, function, x, s, x2));
+            if (f_x1 <= f_x2) b = x2;
+            else a = x1;
+            (x1, x2) = (0.5 * (a + b - 0.5 * DichotomyEps), 0.5 * (a + b + 0.5 * DichotomyEps));
         }
 
         return 0.5 * (x1 + x2);
@@ -192,6 +201,9 @@ class MinimizerMCG : IOptimizator
             point.Add(x[i] + lambda * s[i]);
 
         var fun = function.Bind(point);
-        return objective.Value(fun);
+        var value = objective.Value(fun);
+        LimitingMethod ??= new BarrierMethod();
+        LimitingMethod.Limit(ref value, point, _minimumParameters, _maximumParameters);
+        return value;
     }
 }

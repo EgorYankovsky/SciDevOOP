@@ -18,13 +18,19 @@ using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{
 using var streamReader = new StreamReader(stream!, encoding: Encoding.UTF8);
 var lines = streamReader.ReadToEnd().Split("\n");
 
-var n = int.Parse(lines[0]);
-List<(double x, double y)> points = [];
-for (var i = 1; i <= n; i++)
+partial class Program
 {
-    var str = lines[i].Split();
-    points.Add((double.Parse(str[0]), double.Parse(str[1])));
+    static void Main(string[] args)
+    {
+        var points = Read("input.txt");
+        var optimizer = new MinimizerMCG();
+        var fun = new LineFunctionN();
+        var initial = new Vector { 0.025, 0.025 };
+        var minimal = new Vector { 0.0, 0.0 };
+        var maximal = new Vector { 0.45, 0.45 };
+        var functional = new L1Norm { points = points };
+        //var res = optimizer.Minimize(functional, fun, initial);
+        var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
+        Write(res);
+    }
 }
-var functional = new L1Norm { points = points };
-var res = optimizer.Minimize(functional, fun, initial);
-foreach (var r in res) Console.WriteLine(r);
