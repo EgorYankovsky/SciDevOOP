@@ -1,8 +1,5 @@
 namespace SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 
-/// <summary>
-/// Пороговое улучшение.
-/// </summary>
 public class ThresholdImprovement(double alpha = 0.1) : ITransitionRule
 {
     private readonly double _alpha = alpha;

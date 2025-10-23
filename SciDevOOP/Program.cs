@@ -4,19 +4,21 @@ using SciDevOOP.Functions;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
-using System.Reflection;
-using System.Text;
-
 using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
 
-var optimizer = new MinimizerMCGNew();
-var fun = new LineFunctionN();
-var initial = new Vector { 1.0, 1.0 };
-
-var name = Assembly.GetExecutingAssembly().GetName().Name;
-using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{name}.Resources.input.txt");
-using var streamReader = new StreamReader(stream!, encoding: Encoding.UTF8);
-var lines = streamReader.ReadToEnd().Split("\n");
+/*
+ * Read support console and TXT input.
+ *  - to use console input use as: Read()
+ *  - to use txt input use as: Read("file_name.txt")
+ *  - basicly, it uses \\SciDevOOP\\bin\\Resources\\file_name as input folder
+ *  - also you can set here a random folder.
+ *  
+ *  Write support console and TXT output.
+ *  - to use console output use as: Write(res)
+ *  - to use txt input use as: Read(res, "file_name.txt")
+ *  - basicly, it uses \\SciDevOOP\\bin\\Resources\\file_name as output folder
+ *  - also you can set here a random folder.
+ */
 
 partial class Program
 {

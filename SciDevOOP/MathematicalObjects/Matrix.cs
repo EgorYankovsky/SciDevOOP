@@ -6,15 +6,6 @@ public class Matrix : List<IList<double>>, IDenseMatrix, IMatrixMultiplicand
 {
     public int N => Count;
     public int M => this[0].Count;
-    
-    public Matrix GetTransposed()
-    {
-        var transposedMatrix = new Matrix(M, N);
-        for (var i = 0; i < M; ++i)
-            for (var j = 0; j < N; ++j)
-                transposedMatrix[i][j] = base[j][i];
-        return transposedMatrix;
-    }
 
     IVector IMatrixMultiplicand.Multiplicate(IVector v)
     {
@@ -42,18 +33,13 @@ public class Matrix : List<IList<double>>, IDenseMatrix, IMatrixMultiplicand
         return ans;
     }
 
-    IMatrix IDenseMatrix.GetTransposed() => GetTransposed();
-
-    public static Matrix operator *(Matrix m1, Matrix m2)
+    IMatrix IDenseMatrix.GetTransposed()
     {
-        if (m1.M != m2.N || m1.N != m2.M) throw new Exception("Matrix multiplication is impossible.");
-        var ans = new Matrix(m1.N, m1.N);
-
-        for (var i = 0; i < ans.N; i++)
-            for (var j = 0; j < ans.N; j++)
-                for (var k = 0; k < m1.M; k++)
-                    ans[i][j] += m1[i][k] * m2[k][j];
-        return ans;
+        var transposedMatrix = new Matrix(M, N);
+        for (var i = 0; i < M; ++i)
+            for (var j = 0; j < N; ++j)
+                transposedMatrix[i][j] = base[j][i];
+        return transposedMatrix;
     }
 
     public Matrix(int n, int m)

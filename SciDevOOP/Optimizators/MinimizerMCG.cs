@@ -35,9 +35,9 @@ class MinimizerMCG : IOptimizator
             (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = Method(objective, function, initialParameters);
         }
-        catch (ArgumentException)
+        catch (ArgumentException argEx)
         {
-            Console.WriteLine($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+            Console.WriteLine(argEx.Message);
         }
         catch (Exception ex)
         {
@@ -52,13 +52,12 @@ class MinimizerMCG : IOptimizator
         var xCurr = new Vector(initialParameters.Select(p => p));        
         var s = new Vector([..initialParameters.Select(p => 0)]);
 
-        while (k < MaxIter)
+        while (k < MaxIterations)
         {
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                //var grad = ComputeGradient(objective, function, xCurr);
-                var grad = (function.Bind(xCurr) as IDifferentiableFunction)!.Gradient(xCurr);
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -72,8 +71,8 @@ class MinimizerMCG : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = ComputeGradient(objective, function, xNext);
-            var gradCurr = ComputeGradient(objective, function, xCurr);
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xNext));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -112,31 +111,6 @@ class MinimizerMCG : IOptimizator
         return xCurr;
     }
 
-    //[Obsolete(message: "Method should be deleted.", false)]
-    private IVector ComputeGradient(IFunctional objective, IParametricFunction function, IVector x)
-    {
-        var gradient = new Vector();
-
-        // Базовое значение функции
-        var baseFun = function.Bind(x);
-        double baseValue = objective.Value(baseFun);
-
-        for (int i = 0; i < x.Count; i++)
-        {
-            // perturbed vector
-            var perturbed = new Vector();
-            foreach (var p in x) perturbed.Add(p);
-            perturbed[i] += H;
-
-            var perturbedFun = function.Bind(perturbed);
-            double perturbedValue = objective.Value(perturbedFun);
-
-            gradient.Add((perturbedValue - baseValue) / H);
-        }
-
-        return gradient;
-    }
-
     private double FindMinLambda(IFunctional objective, IParametricFunction function, IVector x, IVector s)
     {
         var interval = FindMinimum(objective, function, x, s);
@@ -145,13 +119,12 @@ class MinimizerMCG : IOptimizator
 
     private (double, double) FindMinimum(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda0 = 0.0)
     {
-        double h = 0;
-        double lambda = lambda0;
-        double delta = 1e-8;
+        var delta = 1e-8;
+        var f_lambda0 = EvaluateFunction(objective, function, x, s, lambda0);
+        var f_lambda_delta = EvaluateFunction(objective, function, x, s, lambda0 + delta);
 
-        double f_lambda0 = EvaluateFunction(objective, function, x, s, lambda0);
-        double f_lambda_delta = EvaluateFunction(objective, function, x, s, lambda0 + delta);
-
+        double lambda;
+        double h;
         if (f_lambda0 > f_lambda_delta)
         {
             lambda = lambda0 + delta;
@@ -162,10 +135,7 @@ class MinimizerMCG : IOptimizator
             lambda = lambda0 + delta;
             h = -delta;
         }
-        else
-        {
-            return (lambda0, lambda0);
-        }
+        else return (lambda0, lambda0);
 
         for (var i = 0; i < 1000; ++i)
         {
@@ -189,7 +159,6 @@ class MinimizerMCG : IOptimizator
             else a = x1;
             (x1, x2) = (0.5 * (a + b - 0.5 * DichotomyEps), 0.5 * (a + b + 0.5 * DichotomyEps));
         }
-
         return 0.5 * (x1 + x2);
     }
 
@@ -197,9 +166,8 @@ class MinimizerMCG : IOptimizator
     private double EvaluateFunction(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda)
     {
         var point = new Vector();
-        for (int i = 0; i < x.Count; i++)
+        for (var i = 0; i < x.Count; i++)
             point.Add(x[i] + lambda * s[i]);
-
         var fun = function.Bind(point);
         var value = objective.Value(fun);
         LimitingMethod ??= new BarrierMethod();

@@ -72,7 +72,6 @@ class IntegrationNorm : IFunctional
 
             sum += weight * partialIntegral;
         }
-
         return sum * h / 3;
     }
 
