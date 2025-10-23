@@ -26,7 +26,12 @@ class MinimizerMCG : IOptimizator
         IVector sln = new Vector();
         try
         {
-            if (objective is not IDifferentiableFunctional) throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+            if (minimumParameters is not null && initialParameters.Count != minimumParameters.Count)
+                throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (maximumParameters is not null && initialParameters.Count != maximumParameters.Count)
+                throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (objective is not IDifferentiableFunctional) 
+                throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
             (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = Method(objective, function, initialParameters);
         }
@@ -79,12 +84,23 @@ class MinimizerMCG : IOptimizator
             var xDiff = new Vector();
             for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
             var xDiffNorm = xDiff.Norma();
-            //if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
-            //if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
+            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
             if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
-                Console.WriteLine($"MCG answer found for {k} iterations.");
-                return xNext;
+                var a = 0; var b = 0;
+                if (_minimumParameters is not null)
+                    for (var i = 0; i < _minimumParameters.Count; ++i)
+                        a += _minimumParameters[i] < xNext[i] ? 0 : 1;
+                if (_maximumParameters is not null)
+                    for (var i = 0; i < _maximumParameters.Count; ++i)
+                        b += _maximumParameters[i] > xNext[i] ? 0 : 1;
+
+                if (a + b == 0)
+                {
+                    Console.WriteLine($"MCG answer found for {k} iterations.");
+                    return xNext;
+                }
             }
             xCurr = xNext;
             k++;
@@ -119,15 +135,15 @@ class MinimizerMCG : IOptimizator
         }
         else return (lambda0, lambda0);
 
-        while (true)
+        for (var i = 0; i < 1000; ++i)
         {
             h *= 2;
             lambda += h;
             var f_prev = EvaluateFunction(objective, function, x, s, lambda - h);
             var f_curr = EvaluateFunction(objective, function, x, s, lambda);
-            if (f_prev <= f_curr)
-                return (Math.Min(lambda0, lambda - h), Math.Max(lambda0, lambda));
+            if (f_prev <= f_curr) break;
         }
+        return (Math.Min(lambda0, lambda - h), Math.Max(lambda0, lambda));
     }
 
     private double DichotomyMethod(IFunctional objective, IParametricFunction function, (double, double) interval, IVector x, IVector s)
@@ -151,7 +167,7 @@ class MinimizerMCG : IOptimizator
             point.Add(x[i] + lambda * s[i]);
         var fun = function.Bind(point);
         var value = objective.Value(fun);
-        LimitingMethod ??= new PenaltyMethod();
+        LimitingMethod ??= new BarrierMethod();
         LimitingMethod.Limit(ref value, point, _minimumParameters, _maximumParameters);
         return value;
     }

@@ -27,9 +27,9 @@ partial class Program
         var points = Read("input.txt");
         var optimizer = new MinimizerMCG();
         var fun = new LineFunctionN();
-        var initial = new Vector { 1.0, 1.0 };
-        var minimal = new Vector { -5.0, -5.0 };
-        var maximal = new Vector { 5.0, 5.0 };
+        var initial = new Vector { 0.025, 0.025 };
+        var minimal = new Vector { 0.0, 0.0 };
+        var maximal = new Vector { 0.45, 0.45 };
         var functional = new L1Norm { points = points };
         //var res = optimizer.Minimize(functional, fun, initial);
         var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
