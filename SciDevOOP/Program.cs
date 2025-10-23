@@ -24,14 +24,20 @@ partial class Program
 {
     static void Main(string[] args)
     {
-        var points = Read("input.txt");
-        var optimizer = new MinimizerMCG();
+        var points = Read("input1.txt");
+        var optimizer = new MinimizerMonteCarlo();
         var fun = new LineFunctionN();
-        var initial = new Vector { 0.025, 0.025 };
-        var minimal = new Vector { 0.0, 0.0 };
-        var maximal = new Vector { 0.45, 0.45 };
-        var functional = new L1Norm { points = points };
-        //var res = optimizer.Minimize(functional, fun, initial);
+        var initial = new Vector { 1.0, 1.0 };
+        var minimal = new Vector { -1.0, -1.0 };
+        var maximal = new Vector { 3.0, 3.0 };
+
+        var lowerBounds = new List<double> { 0.0 };
+        var upperBounds = new List<double> { 5.0 };
+        var numberOfPoints = new List<int> { 5 };
+
+        var functional = new IntegrationNorm(lowerBounds, upperBounds, points, numberOfPoints);
+        //var functional = new L2Norm{ points = points };
+
         var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
         Write(res);
     }
