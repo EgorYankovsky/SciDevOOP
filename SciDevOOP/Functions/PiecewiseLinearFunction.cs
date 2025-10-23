@@ -76,6 +76,12 @@ class PiecewiseLinearFunction : IParametricFunction
         }
     }
 
+    /// <summary>
+    /// Method, that checks correctness of input parameters.
+    /// </summary>
+    /// <param name="parameters">Input parameters.</param>
+    /// <param name="n">Parameters amount.</param>
+    /// <exception cref="ArgumentException">Raises if input data contains mistakes.</exception>
     private void CheckParameters(IVector parameters, int n)
     {
         for (var i = 0; i < n; ++i)

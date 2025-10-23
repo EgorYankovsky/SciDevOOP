@@ -116,7 +116,6 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return x0;
     }
 
-
     private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
         // Predicted reduction: -h^T * J^T * r - 0.5 * h^T * (J^T * J + lambda * I) * h
