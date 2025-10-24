@@ -10,6 +10,9 @@ namespace SciDevOOP.Optimizators;
 
 class MinimizerLevenbergMarquardt : IOptimizator
 {
+    private IVector? _minimumParameters;
+    private IVector? _maximumParameters;
+
     public int MaxIterations = 100;
     public double Tolerance = 1e-15;
     public double LambdaInit = 0.01;
@@ -22,8 +25,13 @@ class MinimizerLevenbergMarquardt : IOptimizator
         IVector sln = new Vector();
         try
         {
+            if (minimumParameters is not null && minimumParameters.Count != initialParameters.Count)
+                throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (maximumParameters is not null && maximumParameters.Count != initialParameters.Count)
+                throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
             if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
+            (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = LevenbergMarquardt(objective, function, initialParameters);
         }
         catch (ArgumentException argEx)
@@ -37,7 +45,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return sln;
     }
 
-    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0, IVector? minimal = null, IVector? maximal = null)
+    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
     {
         var n = x0.Count;
         var lambda = LambdaInit;
@@ -115,7 +123,6 @@ class MinimizerLevenbergMarquardt : IOptimizator
         }
         return x0;
     }
-
 
     private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {

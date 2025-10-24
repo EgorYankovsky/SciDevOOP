@@ -8,7 +8,7 @@ class LineFunctionN : IParametricFunction
 {
     /// <summary>
     /// Represents a line function at N dimension of the form:
-    /// F = c0 + c1*x1 + c2*x2 + ... + cn*xn = 0.
+    /// F = c0 + c1*x1 + c2*x2 + ... + cn*xn.
     /// </summary>
     class InternalLineFunctionN : IDifferentiableFunction
     {

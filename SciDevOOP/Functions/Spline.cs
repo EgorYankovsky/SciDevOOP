@@ -13,6 +13,7 @@ class SplineFunction : IParametricFunction
     /// </summary>
     class InternalSplineFunction : IFunction
     {
+        // Basis functions.
         private double phi1(double t) => 1.0 - 3.0*t*t + 2.0*t*t*t; 
         private double phi2(double t) => t - 2.0*t*t + t*t*t; 
         private double phi3(double t) => 3.0*t*t - 2.0*t*t*t; 

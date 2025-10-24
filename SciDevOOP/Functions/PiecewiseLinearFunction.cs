@@ -20,6 +20,8 @@ class PiecewiseLinearFunction : IParametricFunction
     /// </summary>
     class InternalPiecewiseLinearFunction : IDifferentiableFunction
     {
+        private readonly double _h = 1e-8;
+
         public IVector? x; // x0, x1, ... xn_1.
         public IVector? a; // a0, a1, ... an;
         public IVector? b; // b0, b1, ... bn;
@@ -52,12 +54,21 @@ class PiecewiseLinearFunction : IParametricFunction
 
         IVector IDifferentiableFunction.Gradient(IVector point)
         {
-            if (x is null) throw new Exception("Vector x is null at InternalPiecewiseLinearFunction.Gradient.");
-            if (a is null) throw new Exception("Vector a is null at InternalPiecewiseLinearFunction.Gradient.");
-            if (b is null) throw new Exception("Vector b is null at InternalPiecewiseLinearFunction.Gradient.");
-            if (c is null) throw new Exception("Vector c is null at InternalPiecewiseLinearFunction.Gradient.");
-            var index = FindPiecewiseIndex(point);
-            return new Vector { a[index], b[index] }; ;
+            var gradient = new Vector();
+            var baseValue = (this as IFunction)!.Value(point);
+            for (var i = 0; i < x!.Count + a!.Count + b!.Count + c!.Count; ++i)
+            {
+                var coefficientsCopy = new Vector(x);
+                coefficientsCopy.AddRange(a);
+                coefficientsCopy.AddRange(b);
+                coefficientsCopy.AddRange(c);
+                // If parameter is too little, we shall find derivative with other way.
+                coefficientsCopy[i] += _h;
+                var f1 = new PiecewiseLinearFunction().Bind(coefficientsCopy);
+                var derivative = (f1.Value(point) - baseValue) / _h;
+                gradient.Add(derivative);
+            }
+            return gradient;
         }
 
         /// <summary>
@@ -76,6 +87,12 @@ class PiecewiseLinearFunction : IParametricFunction
         }
     }
 
+    /// <summary>
+    /// Method, that checks correctness of input parameters.
+    /// </summary>
+    /// <param name="parameters">Input parameters.</param>
+    /// <param name="n">Parameters amount.</param>
+    /// <exception cref="ArgumentException">Raises if input data contains mistakes.</exception>
     private void CheckParameters(IVector parameters, int n)
     {
         for (var i = 0; i < n; ++i)
