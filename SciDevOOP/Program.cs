@@ -26,12 +26,14 @@ partial class Program
     {
         var points = Read("input.txt");
         var optimizer = new MinimizerMCG();
-        var fun = new LineFunctionN();
-        var initial = new Vector { 0.025, 0.025 };
+        var fun = new PiecewiseLinearFunction();
+        var initial = new Vector { 0.0, 2.0, 4.0, 6.0,
+                                   8.0, 
+                                   7.0,
+                                   1.0, -2.0, 3.0, -4.0 };
         var minimal = new Vector { 0.0, 0.0 };
         var maximal = new Vector { 0.45, 0.45 };
         var functional = new L1Norm { points = points };
-        //var res = optimizer.Minimize(functional, fun, initial);
         var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
         Write(res);
     }
