@@ -1,193 +1,360 @@
 \chapter{Тестирование}
 
-Проведем несколько тестов на правильность решения задачи оптимизации.
+Проведем несколько тестов на правильность решения задачи оптимизации. Тестирование будем проводить следующим образом: будем брать множество точек, проверить правильность решения задачи минимизации которой интуитивно не вызывает особого труда. Иными словами, будем брать $m$ точек для задачи, которые или удовлетворяют функции, или находятся в непосредственной близости к множеству точек, удовлетворяющим значениям функции.
+Искомые функции будут иметь следующий вид:
+\begin{itemize}
+	\item для линейной функции в N-мерном пространства в качестве примера рассмотрим $F(\vec{x}) = 1 + x_1 + x_2$;
+	\item для полинома -- $P(x) = 1 + 3x + 3x^2 - x^3$;
+	\item для кусочно-линейной функции - $f(x) = -1 + |x+1|-|x|+|x+1|$;
+	\item для сглаживающего сплайна возьмем пример из учебника "Метод конечных элементов для решения скалярных и векторных задач" на странице 214.
+\end{itemize}
 
-\section{Тестирование различных функций}
+Искомые функции изображены на рисунках \ref{fig:LineN} -- \ref{fig:Spline}.
 
-\begin{table}
-	\caption{Тестирование при }
+\begin{figure}
 	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X |}
-		\hline
-		Входные точки & Функционал & Функция & Начальные параметры & Результат \\
-		\hline    
-		
-		\multirow{4}{*}{6
-			0 0
-			1 0,5
-			2 1
-			3 1,5
-			4 2
-			5 2,5} 
-		& \multirow{4}{*}{MyFunctional} 
-		& LineFunctionN 
-		& \multirow{4}{*} {0.3, 0.2}
-		& 4,330748E-04
-		4,996417E-01 \\
-		\cline{3-3} \cline{5-5}
-		
-		& & PiecewiseLinear Function 
-		& & 4,330748E-04
-		4,996417E-01 \\
-		\cline{3-3} \cline{5-5}
-		
-		& & Polynomial 
-		& & 4,330748E-04
-		4,996417E-01 \\
-		\cline{3-3} \cline{5-5}
-		
-		& & Spline 
-		& & 0.00000000E+000; 0.00000000E+000; 0.00000000E+000 \\
-		\hline
-	\end{tabularx}
-	\label{tab:test6}
-\end{table}
+	\vspace*{0.7cm}
+	\includegraphics[width=0.5\linewidth]{images/"Flat1".png}
+	\caption{Линейная функция в 3-х мерном пространстве}
+	\label{fig:LineN}
+\end{figure}
 
-\begin{table}
-	\caption{Тестирование при }
+
+\begin{figure}
 	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test7}
-\end{table}
+	\vspace*{0.7cm}
+	\includegraphics[width=0.5\linewidth]{images/"Flat2".png}
+	\caption{Линейная функция в 3-х мерном пространстве (вид сверху)}
+	\label{fig:LineN1}
+\end{figure}
 
-\begin{table}
-	\caption{Тестирование при }
+
+\begin{figure}
 	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test8}
-\end{table}
+	\vspace*{0.7cm}
+	\includegraphics[width=0.5\linewidth]{images/"Flat3".png}
+	\caption{Линейная функция в 3-х мерном пространстве (вид сбоку)}
+	\label{fig:LineN2}
+\end{figure}
+
+
+\begin{figure}
+	\centering
+	\vspace*{0.7cm}
+	\includegraphics[width=0.5\linewidth]{images/"Polynomial".png}
+	\caption{Полиномиальная функция}
+	\label{fig:Polynomial}
+\end{figure}
+
+\begin{figure}
+\centering
+\vspace*{0.7cm}
+\includegraphics[width=0.6\linewidth]{images/PW.png}
+\caption{Кусочно-линейная функция}
+\label{fig:PW}
+\end{figure}
+
+\begin{figure}
+\centering
+\vspace*{0.7cm}
+\includegraphics[width=0.5\linewidth]{images/"Spline".png}
+\caption{Сглаживающий сплайн}
+\label{fig:Spline}
+\end{figure}
+
+Коэффициенты решения для сглаживающего сплайна выглядит следующим образом: $q = \left[2.5, -0.0117, 2.48, -0.0673, 0.0488, -3.35\right]$.
+
+Тестовые входные данные с координатами точек хранятся в директории \text{/SciDevOOP/bin/Resources}. Содержимое этих файлов представлено в таблице \ref{tab:testData}.
 
 \begin{table}
-	\caption{Тестирование при }
+	\caption{Содержимое файлов с входными данными}
 	\centering
 	\small
 	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		\centering{Линейная 3-х мерная}  & \centering{Полином} & \centering{Кусочно-постоянная} & \centering{Сплайн} \tabularnewline \hline    
+			\text{7}\newline
+			\text{0 0 1} \newline
+			\text{1 0 2} \newline
+			\text{0 1 2} \newline
+			\text{1 1 3} \newline
+			\text{0,5 0 1,5} \newline
+			\text{0 0,5 1,5} \newline
+			\text{0,5 0,5 2} \newline  & 
+			\text{15} \newline
+			\text{-2,5 27,875} \newline
+			\text{-2 15} \newline
+			\text{-1,5 6,625} \newline
+			\text{-1 2} \newline
+			\text{-0,5 0,375} \newline
+			\text{0 1} \newline
+			\text{0,5 3,125} \newline
+			\text{1 6} \newline
+			\text{1,5 8,875} \newline
+			\text{2 11} \newline
+			\text{2,5 11,625} \newline
+			\text{3 10} \newline
+			\text{3,5 5,375} \newline
+			\text{4 -3} \newline
+			\text{4,5 -15,87} \newline & 
+			\text{9} \newline
+			\text{-2 1} \newline
+			\text{-1,5 0,5} \newline
+			\text{-1 0} \newline
+			\text{-0,5 0,5} \newline
+			\text{0 1} \newline
+			\text{0,5 0,5} \newline
+			\text{1 0} \newline
+			\text{1,5 0,5} \newline
+			\text{2 1} & 
+			\text{11} \newline
+			\text{0,0 2,5} \newline
+			\text{0,5 2,5} \newline
+			\text{1,1 2,5} \newline
+			\text{1,5 2,5} \newline
+			\text{2,0 2,5} \newline
+			\text{2,5 2,5} \newline
+			\text{3,0 2,5} \newline
+			\text{4,0 2,3} \newline
+			\text{4,5 1,2} \newline
+			\text{4,8 0,8} \newline
+			\text{5,0 0,0} \newline \tabularnewline \hline    
 	\end{tabularx}
-	\label{tab:test9}
+	\label{tab:testData}
+\end{table}
+
+\section{Тестирование метода имитации отжига}
+
+
+\begin{table}
+	\caption{Тестирование 3-х мерной линейной функции $P(\vec{x}) = 1 + x_1 + x_2$.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+	
+		 & $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+	
+		 & $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+	
+		 & Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testLineN1}
 \end{table}
 
 \begin{table}
-	\caption{Тестирование при }
+	\caption{Тестирование кусочно-линейной функции $f(x) = -1 + |x + 1| + |x| + |x - 1|$.}
 	\centering
 	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test10}
-\end{table}
-
-\section{Тестирование различных функционалов}
-
-\begin{table}
-	\caption{Тестирование при }
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
-	\label{tab:test1}
+	\label{tab:testPW1}
 \end{table}
 
 \begin{table}
-	\caption{Тестирование при }
+	\caption{Тестирование полиномиальной функции $P(x) = 1 + 3x + 3x^2 - x^3$.}
 	\centering
 	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
-	\label{tab:test2}
+	\label{tab:testPolynomial1}
 \end{table}
 
 \begin{table}
-	\caption{Тестирование при }
+	\caption{Тестирование сплайна.}
 	\centering
 	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
-	\label{tab:test3}
+	\label{tab:testSpline1}
+\end{table}
+
+\section{Тестирование метода сопряжённых градиентов}
+
+\begin{table}
+	\caption{Тестирование 3-х мерной линейной функции $P(\vec{x}) = 1 + x_1 + x_2$.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testLineN2}
 \end{table}
 
 \begin{table}
-	\caption{Тестирование при }
+	\caption{Тестирование кусочно-линейной функции $f(x) = -1 + |x + 1| + |x| + |x - 1|$.}
 	\centering
 	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
-	\label{tab:test4}
+	\label{tab:testPW2}
 \end{table}
 
 \begin{table}
-	\caption{Тестирование при }
+	\caption{Тестирование полиномиальной функции $P(x) = 1 + 3x + 3x^2 - x^3$.}
 	\centering
 	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
-	\label{tab:test5}
+	\label{tab:testPolynomial2}
 \end{table}
 
-\section{Тестирование различных методов оптимизации}
+\begin{table}
+	\caption{Тестирование сплайна.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testSpline2}
+\end{table}
+
+
+\section{Тестирование метода Левенберга — Марквардта}
+
+\begin{table}
+	\caption{Тестирование 3-х мерной линейной функции $P(\vec{x}) = 1 + x_1 + x_2$.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testLineN3}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование кусочно-линейной функции $f(x) = -1 + |x + 1| + |x| + |x - 1|$.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testPW3}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование полиномиальной функции $P(x) = 1 + 3x + 3x^2 - x^3$.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testPolynomial3}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование сплайна.}
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		
+		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:testSpline3}
+\end{table}
