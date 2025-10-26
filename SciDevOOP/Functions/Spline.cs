@@ -31,7 +31,7 @@ class SplineFunction : IParametricFunction
         {
             var indexLeft = 0;
             var indexRight = x!.Count - 1;
-            while (indexLeft <= indexRight)
+            while (indexRight - indexLeft > 1)
             {
                 var middleIndex = (indexLeft + indexRight) / 2;
                 if (point[0] == x![middleIndex])
@@ -44,15 +44,23 @@ class SplineFunction : IParametricFunction
                 else if (point[0] > x[middleIndex])
                     indexLeft = middleIndex;
             }
+            Console.WriteLine($"{indexLeft} {indexRight}");
             return indexLeft;
         }
 
         double IFunction.Value(IVector point)
         {
+            if (point[0] < x![0] || point[0] > x![^1])
+                throw new ArgumentException("Point is out of spline range.");
+            if (x![^1] - point[0] <= 1e-15)
+            {
+                var hLast = x![^1] - x![^2];
+                return q![^4] * phi1(1.0D) + hLast * q![^3] * phi2(1.0D) + q![^2] * phi3(1.0D) + hLast * q![^1] * phi4(1.0D);
+            }
             var index = FindSplineIndex(point);
             var h = x![index + 1] - x![index];
             var eps = (point[0] - x![index]) / h;
-            return phi1(eps) + h * phi2(eps) + phi3(eps) + h * phi4(eps);
+            return q![2 * index] * phi1(eps) + h * q[2 * index + 1] * phi2(eps) + q![2 * (index + 1)] * phi3(eps) + h * q![2 * (index + 1) + 1] * phi4(eps);
         }
     }
 
