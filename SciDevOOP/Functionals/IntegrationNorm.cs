@@ -1,197 +1,217 @@
 ﻿using SciDevOOP.ImmutableInterfaces.Functionals;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.MathematicalObjects;
+using System.Drawing;
 
 namespace SciDevOOP.Functionals;
 
 class IntegrationNorm : IFunctional
 {
-    public IList<IList<double>> points; // Точки для численного интегрирования
+    public IList<IList<double>> points; // Точки данных
     public IList<double> LowerBound { get; set; }
     public IList<double> UpperBound { get; set; }
     public IList<int> NumberOfPoints { get; set; }
+    public int GaussOrder { get; set; } = 5; // порядок квадратуры Гаусса: 3, 4 или 5
 
-    public IntegrationNorm(IList<double> lowerBound, IList<double> upperBound, IList<int> numberOfPoints = null)
+    public IntegrationNorm(IList<double> lowerBound, IList<double> upperBound, int gaussOrder = 5, IList<int> numberOfPoints = null)
     {
         LowerBound = lowerBound;
         UpperBound = upperBound;
-        if (numberOfPoints == null)
-        {
-            NumberOfPoints = new List<int>();
-            for (int i = 0; i<lowerBound.Count; i++)
-            {
-                NumberOfPoints.Add(1000);
-            }
-        }
-        else
-        {
-            NumberOfPoints = numberOfPoints;
-        }
+        GaussOrder = Math.Clamp(gaussOrder, 3, 6);
+
+        NumberOfPoints = numberOfPoints ?? Enumerable.Repeat(gaussOrder, lowerBound.Count).ToList();
+    }
+
+    public void SetDataPoints(IList<IList<double>> dataPoints)
+    {
+        points = dataPoints;
+    }
+
+    public IntegrationNorm(IList<double> lowerBounds, IList<double> upperBounds, IList<IList<double>> dataPoints, int gaussOrder = 4)
+        : this(lowerBounds, upperBounds, gaussOrder)
+    {
+        SetDataPoints(dataPoints);
     }
 
     double IFunctional.Value(IFunction function)
     {
-        // L² норма ошибки: sqrt(∫|f(x) - y(x)|² dx)
-        // где y(x) - интерполяция данных точек
         double integral = MultiDimensionalIntegration(function, LowerBound, UpperBound, NumberOfPoints);
         return Math.Sqrt(integral);
     }
 
     private double MultiDimensionalIntegration(IFunction function, IList<double> lower, IList<double> upper, IList<int> nPoints)
     {
-        int dimesions = lower.Count;
-
-        // Рекурсивное интегрирование по всем измерениям
         return RecursiveIntegration(function, lower, upper, nPoints, 0, new List<double>());
     }
 
-    private double RecursiveIntegration(IFunction function, IList<double> lower, IList<double> upper, IList<int> nPoints, int currentDim, List<double> currentPoint)
+    private double RecursiveIntegration(IFunction function, IList<double> lower, IList<double> upper, IList<int> nPoints, int dim, List<double> point)
     {
-        if (currentDim == lower.Count)
-        {
-            // Для полной размерности вычисляем подынтегральное выражение
-            return SquareError(function, currentPoint);
-        }
+        if (dim == lower.Count)
+            return SquareError(function, point);
 
-        double a = lower[currentDim];
-        double b = upper[currentDim];
-        int n = nPoints[currentDim];
-
-        //if (n % 2 == 1) n++;
-
-        //double h = (b - a) / n;
-        //double sum = 0;
-
-        //for (int i = 0; i < n; i++)
-        //{
-        //    double x = a + i * h;
-        //    List<double> newPoint = new List<double>(currentPoint) { x };
-
-        //    double weight = GetSimpsonWeight(i, n);
-        //    double partialIntegral = RecursiveIntegration(function, lower, upper, nPoints, currentDim + 1, newPoint);
-
-        //    sum += weight * partialIntegral;
-        //}
-        //return sum * h / 3;
-
+        double a = lower[dim];
+        double b = upper[dim];
+        int n = nPoints[dim];
         var (weights, nodes) = GetGaussWeightsAndNodes(n);
 
-        double sum = 0;
-
-        for (int i = 0; i < n; i++)
+        double sum = 0.0;
+        for (int i = 0; i < nodes.Length; i++)
         {
-            // Преобразование координат из [-1,1] в [a,b]
             double x = ((b - a) * nodes[i] + (a + b)) / 2.0;
-            List<double> newPoint = new List<double>(currentPoint) { x };
-
-            double partialIntegral = RecursiveIntegration(function, lower, upper, nPoints, currentDim + 1, newPoint);
-            sum += weights[i] * partialIntegral;
+            var newPoint = new List<double>(point) { x };
+            double partial = RecursiveIntegration(function, lower, upper, nPoints, dim + 1, newPoint);
+            sum += weights[i] * partial;
         }
-
-        // Масштабирующий коэффициент для преобразования координат
-        return sum * (b - a) / 2.0;    
+        return sum * (b - a) / 2.0;
     }
 
-    // Метод для получения весов и узлов квадратуры Гаусса
     private (double[] weights, double[] nodes) GetGaussWeightsAndNodes(int n)
     {
         switch (n)
         {
-            case 1:
-                return (new double[] { 2.0 }, new double[] { 0.0 });
-            case 2:
-                return (new double[] { 1.0, 1.0 },
-                        new double[] { -0.5773502691896257, 0.5773502691896257 });
             case 3:
-                return (new double[] { 0.5555555555555556, 0.8888888888888888, 0.5555555555555556 },
-                        new double[] { -0.7745966692414834, 0.0, 0.7745966692414834 });
+                return (new double[] { 5.0 / 9, 8.0 / 9, 5.0 / 9 },
+                        new double[] { -Math.Sqrt(3.0 / 5.0), 0.0, Math.Sqrt(3.0 / 5.0) });
             case 4:
                 return (new double[] { 0.3478548451374538, 0.6521451548625461,
-                                   0.6521451548625461, 0.3478548451374538 },
+                                       0.6521451548625461, 0.3478548451374538 },
                         new double[] { -0.8611363115940526, -0.3399810435848563,
-                                   0.3399810435848563, 0.8611363115940526 });
+                                        0.3399810435848563, 0.8611363115940526 });
             case 5:
                 return (new double[] { 0.2369268850561891, 0.4786286704993665, 0.5688888888888889,
-                                   0.4786286704993665, 0.2369268850561891 },
+                                       0.4786286704993665, 0.2369268850561891 },
                         new double[] { -0.9061798459386640, -0.5384693101056831, 0.0,
-                                   0.5384693101056831, 0.9061798459386640 });
+                                        0.5384693101056831, 0.9061798459386640 });
             case 6:
                 return (new double[] { 0.1713244923791704, 0.3607615730481386, 0.4679139345726910,
-                                   0.4679139345726910, 0.3607615730481386, 0.1713244923791704 },
+                                       0.4679139345726910, 0.3607615730481386, 0.1713244923791704 },
                         new double[] { -0.9324695142031521, -0.6612093864662645, -0.2386191860831969,
-                                   0.2386191860831969, 0.6612093864662645, 0.9324695142031521 });
+                                       0.2386191860831969, 0.6612093864662645, 0.9324695142031521 });
             default:
-                // Для большего количества точек используем 6 по умолчанию
-                return GetGaussWeightsAndNodes(6);
+                return GetGaussWeightsAndNodes(5);
         }
     }
 
-    //private double GetSimpsonWeight(int i, int n)
-    //{
-    //    if (i == 0 || i == n) return 1;
-    //    return (i % 2 == 0) ? 2 : 4;
-    //}
-
-
     private double SquareError(IFunction function, IList<double> point)
     {
-        // Создаем вектор для функции - все координаты кроме последней (если есть значение)
-        var inputCoords = point;
-
-        var input = new Vector(inputCoords);
-        double functionValue = function.Value(input);
-
-        // Находим ближайшую точку для y(x)
-        double targetValue = InterpolateValue(point);
-        double error = functionValue - targetValue;
-        return error * error;
+        Vector x = new Vector(point);
+        double f = function.Value(x);
+        double y = InterpolateValue(point);
+        double e = f - y;
+        return e * e;
     }
 
     private double InterpolateValue(IList<double> point)
     {
-        if (!point.Any()) return 0; /////////////////////////
+        // Для 2D данных используем билинейную интерполяцию
+        if (point.Count == 2)
+            return BilinearInterpolation(point[0], point[1]);
 
-        double minDistance = double.MaxValue;
-        double bestValue = 0;
-        // Простая линейная интерполяция
+        // Для общего случая - интерполяция по ближайшим соседям с весами
+        return InverseDistanceWeighting(point);
+    }
+
+    // Билинейная интерполяция для 2D данных
+    private double BilinearInterpolation(double x, double y)
+    {
+        if (points == null || points.Count == 0) return 0;
+
+        // Находим окружающие точки
+        var sortedByX = points.OrderBy(p => p[0]).ToList();
+        var sortedByY = points.OrderBy(p => p[1]).ToList();
+
+        // Создаем точку для поиска соседей
+        var currentPoint = new List<double> { x, y };
+
+        // Находим ближайшие точки для интерполяции
+        var neighbors = FindNearestNeighbors(currentPoint, 4); // Берем 4 ближайшие точки
+
+        if (neighbors.Count < 3)
+            return neighbors.FirstOrDefault().Value;
+
+        // Для треугольной интерполяции
+        return TriangularInterpolation(x, y, neighbors);
+    }
+
+    // Интерполяция с обратными весами расстояний
+    private double InverseDistanceWeighting(IList<double> point, double power = 2.0)
+    {
+        if (points == null || points.Count == 0) return 0;
+
+        double sumWeights = 0;
+        double sumValues = 0;
+
         foreach (var dataPoint in points)
         {
             double distance = CalculateDistance(point, dataPoint);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                // Предполагаем, что последняя координата - значение функции
-                bestValue = dataPoint[dataPoint.Count - 1];
-            }
+            if (distance < 1e-10) // Если точка совпадает с одной из данных
+                return dataPoint[dataPoint.Count - 1];
+
+            double weight = 1.0 / Math.Pow(distance, power);
+            sumWeights += weight;
+            sumValues += weight * dataPoint[dataPoint.Count - 1];
         }
-        return bestValue;
+
+        return sumValues / sumWeights;
     }
 
-    private double CalculateDistance(IList<double> point1, IList<double> point2)
+    // Треугольная интерполяция для 2D
+    private double TriangularInterpolation(double x, double y, List<(IList<double> Point, double Value)> neighbors)
     {
-        double sum = 0;
-        int minDim = Math.Min(point1.Count, point2.Count);
+        if (neighbors.Count < 3) return neighbors.First().Value;
 
-        for (int i = 0; i < minDim; i++)
+        // Находим три ближайшие точки, образующие треугольник
+        var triangle = FindTriangle(x, y, neighbors);
+        if (triangle.Count != 3) return InverseDistanceWeighting(new List<double> { x, y });
+
+        // Барицентрическая интерполяция
+        return BarycentricInterpolation(x, y, triangle);
+    }
+
+    private double BarycentricInterpolation(double x, double y, List<(IList<double> Point, double Value)> triangle)
+    {
+        var p1 = triangle[0].Point; double v1 = triangle[0].Value;
+        var p2 = triangle[1].Point; double v2 = triangle[1].Value;
+        var p3 = triangle[2].Point; double v3 = triangle[2].Value;
+
+        double x1 = p1[0], y1 = p1[1];
+        double x2 = p2[0], y2 = p2[1];
+        double x3 = p3[0], y3 = p3[1];
+
+        double det = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3);
+
+        double w1 = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / det;
+        double w2 = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / det;
+        double w3 = 1 - w1 - w2;
+
+        return w1 * v1 + w2 * v2 + w3 * v3;
+    }
+
+    private List<(IList<double> Point, double Value)> FindNearestNeighbors(IList<double> point, int k)
+    {
+        return points
+            .Select(p => (Point: p, Distance: CalculateDistance(point, p), Value: p[p.Count - 1]))
+            .OrderBy(t => t.Distance)
+            .Take(k)
+            .Select(t => (t.Point, t.Value))
+            .ToList();
+    }
+
+    private List<(IList<double> Point, double Value)> FindTriangle(double x, double y, List<(IList<double> Point, double Value)> neighbors)
+    {
+        // Простая реализация - берем три ближайшие точки
+        return neighbors.Take(3).ToList();
+    }
+
+    private double CalculateDistance(IList<double> a, IList<double> b)
+    {
+        int dim = Math.Min(a.Count, b.Count - 1); // Учитываем, что последний элемент b - значение
+        double sum = 0;
+        for (int i = 0; i < dim; i++)
         {
-            double diff = point1[i] - point2[i];
+            double diff = a[i] - b[i];
             sum += diff * diff;
         }
-
         return Math.Sqrt(sum);
-    }
-
-    // Метод для установки точек данных
-    public void SetDataPoints(IList<IList<double>> dataPoints)
-    {
-        this.points = dataPoints;
-    }
-
-    // Альтернативный конструктор с точками данных
-    public IntegrationNorm(IList<double> lowerBounds, IList<double> upperBounds,
-                          IList<IList<double>> dataPoints, IList<int> numberOfPoints = null)
-        : this(lowerBounds, upperBounds, numberOfPoints)
-    {
-        SetDataPoints(dataPoints);
     }
 }

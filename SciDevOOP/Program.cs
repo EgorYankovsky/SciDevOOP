@@ -24,19 +24,23 @@ partial class Program
 {
     static void Main(string[] args)
     {
-        var points = Read("input1.txt");
+        var points = Read("input2.txt");
         var optimizer = new MinimizerMonteCarlo();
         var fun = new LineFunctionN();
-        var initial = new Vector { 1.0, 1.0 };
-        var minimal = new Vector { -1.0, -1.0 };
-        var maximal = new Vector { 3.0, 3.0 };
 
-        var lowerBounds = new List<double> { 0.0 };
-        var upperBounds = new List<double> { 5.0 };
-        var numberOfPoints = new List<int> { 5 };
+        // Увеличиваем порядок Гаусса и количество точек
+        var initial = new Vector { 1, 1, 1 };
+        var minimal = new Vector { 0.0, 0.0, 0.0 };
+        var maximal = new Vector { 2.0, 2.0, 2.0 }; // Расширяем границы
 
-        var functional = new IntegrationNorm(lowerBounds, upperBounds, points, numberOfPoints);
-        //var functional = new L2Norm{ points = points };
+        var lowerBounds = new List<double> { 0.0, 0.0 };
+        var upperBounds = new List<double> { 1.0, 1.0 }; // Область [0,1]x[0,1]
+
+        // Увеличиваем количество точек Гаусса
+        var numberOfPoints = new List<int> { 6, 6 };
+
+        // Используем более высокий порядок Гаусса
+        var functional = new IntegrationNorm(lowerBounds, upperBounds, points, 6);
 
         var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
         Write(res);
