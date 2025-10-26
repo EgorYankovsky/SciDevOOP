@@ -53,7 +53,7 @@ class PiecewiseLinearFunction : IParametricFunction
     /// <summary>
     /// Method, that binds parameters to function. Must be successfully tested!
     /// </summary>
-    /// <param name="parameters">parameters = [x0, x1, ... xn, a, b, c0, c1, ... cn]</param>
+    /// <param name="parameters">parameters = [a, b, x0, x1, ... xn, c0, c1, ... cn]</param>
     /// <returns>Generated InternalPiecewiseLinearFunction class.</returns>
     /// <exception cref="ArgumentException">Raises if input data was in incorrect format.</exception>
     public IFunction Bind(IVector parameters)
@@ -62,9 +62,9 @@ class PiecewiseLinearFunction : IParametricFunction
         var n = (parameters.Count - 2) / 2;
         return new InternalPiecewiseLinearFunction()
         {
-            xes = new Vector(parameters.Take(n)),
-            a = parameters[n],
-            b = parameters[n + 1],
+            a = parameters[0],
+            b = parameters[1],
+            xes = new Vector(parameters.Skip(2).Take(n)),
             c = new Vector(parameters.Skip(n + 2).Take(n))
         };
     }
