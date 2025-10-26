@@ -13,7 +13,6 @@ class MinimizerMCG : IOptimizator
     private IVector? _minimumParameters;
     private IVector? _maximumParameters;
 
-
     public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
     public double DichotomyEps = 1e-7;

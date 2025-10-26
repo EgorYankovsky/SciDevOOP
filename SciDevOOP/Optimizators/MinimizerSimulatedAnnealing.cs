@@ -30,31 +30,42 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
         var ti = 100.0; // Current temperature.
 
         uint outerIter = 0;
-        while (ti > MinTemperature)
+        try
         {
-            uint i = 0; // Current iteration.
-            while (i < MaxIterations)
+            while (ti > MinTemperature)
             {
-                for (var ii = 0; ii < parameters.Count; ++ii)
+                uint i = 0; // Current iteration.
+                while (i < MaxIterations)
                 {
-                    var sign = Math.Pow(-1, rnd.Next(2));
-                    parameters[ii] = minParameters[ii] + sign * (minimumParameters[ii] + (maximumParameters[ii] - minimumParameters[ii]) * rnd.NextDouble());
-                }
+                    for (var ii = 0; ii < parameters.Count; ++ii)
+                    {
+                        var sign = Math.Pow(-1, rnd.Next(2));
+                        parameters[ii] = minParameters[ii] + sign * (minimumParameters[ii] + (maximumParameters[ii] - minimumParameters[ii]) * rnd.NextDouble());
+                    }
 
-                var newFunctionalValue = objective.Value(function.Bind(parameters));
-                var probability = _transitionRule.Value(ti, newFunctionalValue, minFunctionalValue);
+                    var newFunctionalValue = objective.Value(function.Bind(parameters));
+                    var probability = _transitionRule.Value(ti, newFunctionalValue, minFunctionalValue);
 
-                if (rnd.NextDouble() < probability)
-                {
-                    minFunctionalValue = newFunctionalValue;
-                    minParameters = [.. parameters.Select(v => v)];
+                    if (rnd.NextDouble() < probability)
+                    {
+                        minFunctionalValue = newFunctionalValue;
+                        minParameters = [.. parameters.Select(v => v)];
+                    }
+                    ++i;
                 }
-                ++i;
+                outerIter++;
+                ti = _temperatureChangeLaw.Value(ti, outerIter);
             }
-            outerIter++;
-            ti = _temperatureChangeLaw.Value(ti, outerIter);
+            Console.WriteLine($"Total iterations: {outerIter * MaxIterations}");
         }
-        Console.WriteLine($"Total iterations: {outerIter * MaxIterations}");
+        catch (ArgumentException argEx)
+        {
+            Console.WriteLine($"Argument exception raised at MinimizerSimulatedAnnealing.\n{argEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected error raised at MinimizerSimulatedAnnealing.\n{ex.Message}");
+        }
         return minParameters; 
     }
 }

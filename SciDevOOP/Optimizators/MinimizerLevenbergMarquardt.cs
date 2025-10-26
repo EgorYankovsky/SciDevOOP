@@ -10,6 +10,9 @@ namespace SciDevOOP.Optimizators;
 
 class MinimizerLevenbergMarquardt : IOptimizator
 {
+    private IVector? _minimumParameters;
+    private IVector? _maximumParameters;
+
     public int MaxIterations = 100;
     public double Tolerance = 1e-15;
     public double LambdaInit = 0.01;
@@ -22,8 +25,13 @@ class MinimizerLevenbergMarquardt : IOptimizator
         IVector sln = new Vector();
         try
         {
+            if (minimumParameters is not null && minimumParameters.Count != initialParameters.Count)
+                throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (maximumParameters is not null && maximumParameters.Count != initialParameters.Count)
+                throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
             if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
+            (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = LevenbergMarquardt(objective, function, initialParameters);
         }
         catch (ArgumentException argEx)
@@ -37,7 +45,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         return sln;
     }
 
-    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0, IVector? minimal = null, IVector? maximal = null)
+    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
     {
         var n = x0.Count;
         var lambda = LambdaInit;
@@ -54,7 +62,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
             var gradient = (J as IMatrixMultiplicand)!.Multiplicate(residuals);
 
             // Check gradient's norm.
-            if ((gradient as INormable)!.Norma() < Tolerance) return x0;
+            if ((gradient as INormable)!.Norma() < Tolerance) return GetLimitedResult(x0);
 
             // Hessian generation: J^T * J
             var Jt = (J as IDenseMatrix)!.GetTransposed();
@@ -107,15 +115,33 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 // Failed step - increase regularization parameter.
                 lambda *= Nu;
                 // Return if lambda too big.
-                if (lambda > 1e16) return x0;
+                if (lambda > 1e16) return GetLimitedResult(x0);
             }
-            if ((h as INormable)!.Norma() < Tolerance * (1 + (x0 as INormable)!.Norma())) return x0;
-            if (Math.Abs(actualReduction) < Tolerance) return x0;
+            if ((h as INormable)!.Norma() < Tolerance * (1 + (x0 as INormable)!.Norma())) return GetLimitedResult(x0);
+            if (Math.Abs(actualReduction) < Tolerance) return GetLimitedResult(x0);
             k++;
         }
-        return x0;
+        return GetLimitedResult(x0);
     }
 
+
+    /// <summary>
+    /// Method, that limits result vector.
+    /// </summary>
+    /// <param name="ans">Not limited result vector.</param>
+    /// <returns>Vector with minimal and maximal limitations.</returns>
+    private IVector GetLimitedResult(IVector ans)
+    {
+        if (_minimumParameters is not null)
+            for (var i = 0; i < ans.Count; ++i)
+                if (ans[i] < _minimumParameters[i])
+                    ans[i] = _minimumParameters[i];
+        if (_maximumParameters is not null)
+            for (var i = 0; i < ans.Count; ++i)
+                if (ans[i] > _maximumParameters[i])
+                    ans[i] = _maximumParameters[i];
+        return ans;
+    }
 
     private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
