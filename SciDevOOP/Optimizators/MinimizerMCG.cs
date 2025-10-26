@@ -103,6 +103,8 @@ class MinimizerMCG : IOptimizator
             }
             xCurr = xNext;
             k++;
+            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
+            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
         }
         Console.WriteLine($"MCG reached max iterations: {k}");
         return xCurr;
@@ -159,6 +161,7 @@ class MinimizerMCG : IOptimizator
         return 0.5 * (x1 + x2);
     }
 
+    [Obsolete(message: "Method should be deleted.", false)]
     private double EvaluateFunction(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda)
     {
         var point = new Vector();
