@@ -40,9 +40,9 @@ class SplineFunction : IParametricFunction
                     break;
                 }
                 else if (point[0] < x[middleIndex])
-                    indexRight = middleIndex - 1;
+                    indexRight = middleIndex;
                 else if (point[0] > x[middleIndex])
-                    indexLeft = middleIndex + 1;
+                    indexLeft = middleIndex;
             }
             return indexLeft;
         }

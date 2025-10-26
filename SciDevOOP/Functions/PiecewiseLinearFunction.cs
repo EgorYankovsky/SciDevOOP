@@ -62,8 +62,8 @@ class PiecewiseLinearFunction : IParametricFunction
         var n = (parameters.Count - 2) / 2;
         return new InternalPiecewiseLinearFunction()
         {
-            a = parameters[0],
-            b = parameters[1],
+            a = parameters[1],
+            b = parameters[0],
             xes = new Vector(parameters.Skip(2).Take(n)),
             c = new Vector(parameters.Skip(n + 2).Take(n))
         };

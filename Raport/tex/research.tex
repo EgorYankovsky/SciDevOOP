@@ -2,6 +2,112 @@
 
 Проведем несколько тестов на правильность решения задачи оптимизации.
 
+\section{Тестирование различных функций}
+
+\begin{table}
+	\caption{Тестирование при }
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X |}
+		\hline
+		Входные точки & Функционал & Функция & Начальные параметры & Результат \\
+		\hline    
+		
+		\multirow{4}{*}{6
+			0 0
+			1 0,5
+			2 1
+			3 1,5
+			4 2
+			5 2,5} 
+		& \multirow{4}{*}{MyFunctional} 
+		& LineFunctionN 
+		& \multirow{4}{*} {0.3, 0.2}
+		& 4,330748E-04
+		4,996417E-01 \\
+		\cline{3-3} \cline{5-5}
+		
+		& & PiecewiseLinear Function 
+		& & 4,330748E-04
+		4,996417E-01 \\
+		\cline{3-3} \cline{5-5}
+		
+		& & Polynomial 
+		& & 4,330748E-04
+		4,996417E-01 \\
+		\cline{3-3} \cline{5-5}
+		
+		& & Spline 
+		& & 0.00000000E+000; 0.00000000E+000; 0.00000000E+000 \\
+		\hline
+	\end{tabularx}
+	\label{tab:test6}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование при }
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:test7}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование при }
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:test8}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование при }
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:test9}
+\end{table}
+
+\begin{table}
+	\caption{Тестирование при }
+	\centering
+	\small
+	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+		\hline
+		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		
+		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
+		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+	\end{tabularx}
+	\label{tab:test10}
+\end{table}
+
 \section{Тестирование различных функционалов}
 
 \begin{table}
@@ -82,88 +188,6 @@
 		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
 	\label{tab:test5}
-\end{table}
-
-\section{Тестирование различных функций}
-
-\begin{table}
-	\caption{Тестирование при }
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test6}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование при }
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test7}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование при }
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test8}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование при }
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test9}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование при }
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Входные точки}  & \centering{Функция} & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & \multirow{4}{*}{\centering{FFFFF}} & L1Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & L2Norm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & LInfNorm & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{3-4}
-		& & Integral & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:test10}
 \end{table}
 
 \section{Тестирование различных методов оптимизации}
