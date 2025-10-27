@@ -23,32 +23,64 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
 partial class Program
 {
-    static int Main(string[] args)
+    static void Main(string[] args)
     {
-        var points = Read("input.txt");
+        var points = Read("inputPW.txt");
         var optimizer = new MinimizerMonteCarlo();
-        var fun = new SplineFunction();
-        var initial = new Vector { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.0, 2.0, 5.0 };
-        TestSpline(initial);
-        return 0;
-        IVector? minimal = new Vector { 1.5, -1.0117, 1.48, -1.0637, -1.09512, -4.35, -1.0, 1.0, 4.0 };
-        IVector? maximal = new Vector { 3.5, 0.9883, 3.48, 0.9327, 1.0488, -2.35, 1.0, 2.0, 6.0 };
-        var functional = new MyFunctional { points = points };
+        var fun = new PiecewiseLinearFunction();
+        var initial = new Vector
+        {
+            -0.5,
+            0.5,
+            0.1, 0.2, 0.3,
+            -1.0, 0.0, 1.0
+        };
+        //TestSpline();
+        IVector? minimal = new Vector
+        { 
+            -1.0,
+            -1.0,
+            0.0, -2.0, 0.0,
+            -1.0, 0.0, 1.0
+        };
+        IVector? maximal = new Vector
+        {
+            2.0,
+            2.0,
+            2.0, 0.0, 2.0,
+            -1.0, 0.0, 1.0
+        };
+        var functional = new MyFunctional
+        { 
+            points = points 
+        };
         var res = optimizer.Minimize(functional, fun, initial, minimal, maximal);
         Write(res);
     }
 
 
-    static void TestSpline(IVector parameters)
+    static void TestSpline()
     {
-        double x0 = -2.0D;
+        var testParameters = new Vector
+        {
+            2.423998E+00, 5.027523E-02, 2.459760E+00, 6.372630E-02, 5.835484E-02, -3.137954E+00,
+            0.000000E+00, 2.000000E+00, 5.000000E+00
+        };
+
+        var xes = new Vector();
+        var yes = new Vector();
+
+        double x0 = 0.0D;
         double xi = x0;
         double xStep = 0.1D;
-        var f = new SplineFunction().Bind(parameters);
-        for (int i = 0; xi <= 6.0D; ++i, xi = x0 + i * xStep)
+        var f = new SplineFunction().Bind(testParameters);
+        for (int i = 0; xi <= 5.0D; ++i, xi = x0 + i * xStep)
         {
-            System.Console.WriteLine($"f({xi}) = {f.Value(new Vector {xi})}");   
+            xes.Add(xi);
+            yes.Add(f.Value(new Vector { xi }));
         }
+        foreach (var x in xes) Console.WriteLine(x);
+        Console.WriteLine();  
+        foreach (var y in yes) Console.WriteLine(y);   
     }
-
 }

@@ -3,6 +3,8 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
+using SciDevOOP.Functions;
+using System.Runtime.CompilerServices;
 
 namespace SciDevOOP.Optimizators;
 
@@ -27,6 +29,14 @@ class MinimizerMonteCarlo : IOptimizator
             for (var i = 0; i < MaxIterations; i++)
             {
                 for (var j = 0; j < param.Count; j++) param[j] = minimumParameters[j] + (maximumParameters[j] - minimumParameters[j]) * rand.NextDouble();
+                
+                if (fun is IMeshable)
+                {
+                    var mesh = (fun as IMeshable)!.GetMesh();
+                    for (int ii = 1; ii <= mesh.Count; ++ii)
+                        param[^ii] = mesh[^ii];
+                }
+                
                 var f = objective.Value(function.Bind(param));
                 if (f < currentMin)
                 {
