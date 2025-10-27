@@ -26,16 +26,17 @@ class PiecewiseLinearFunction : IParametricFunction
         {
             var gradient = new Vector();
             var baseValue = (this as IFunction)!.Value(point);
-            for (var i = 0; i < xes!.Count + c!.Count + 2; ++i)
+            for (var i = 0; i < c!.Count + 2; ++i)
             {
-                var coefficientsCopy = new Vector(xes) { a, b };
+                var coefficientsCopy = new Vector { a, b };
                 coefficientsCopy.AddRange(c);
-                // If parameter is too little, we shall find derivative with other way.
+                coefficientsCopy.AddRange(xes!); // ?
                 coefficientsCopy[i] += _h;
                 var f1 = new PiecewiseLinearFunction().Bind(coefficientsCopy);
                 var derivative = (f1.Value(point) - baseValue) / _h;
                 gradient.Add(derivative);
             }
+            gradient.AddRange(xes!.Select(x => 0.0));
             return gradient;
         }
 
