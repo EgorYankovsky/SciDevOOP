@@ -11,7 +11,7 @@ class SplineFunction : IParametricFunction
     /// P(x) = sum_{i = 1}^{2n} (q_i * psi_i(x))
     /// where q_i - coefficient, psi_i - basis function.
     /// </summary>
-    class InternalSplineFunction : IFunction
+    class InternalSplineFunction : IFunction, IMeshable
     {
         // Basis functions.
         private double phi1(double t) => 1.0 - 3.0*t*t + 2.0*t*t*t; 
@@ -44,7 +44,7 @@ class SplineFunction : IParametricFunction
                 else if (point[0] > x[middleIndex])
                     indexLeft = middleIndex;
             }
-            Console.WriteLine($"{indexLeft} {indexRight}");
+            //Console.WriteLine($"{indexLeft} {indexRight}");
             return indexLeft;
         }
 
@@ -62,6 +62,8 @@ class SplineFunction : IParametricFunction
             var eps = (point[0] - x![index]) / h;
             return q![2 * index] * phi1(eps) + h * q[2 * index + 1] * phi2(eps) + q![2 * (index + 1)] * phi3(eps) + h * q![2 * (index + 1) + 1] * phi4(eps);
         }
+
+        IVector IMeshable.GetMesh() => x is not null ? x : new Vector();
     }
 
     /// <summary>
@@ -69,7 +71,7 @@ class SplineFunction : IParametricFunction
     /// </summary>
     /// <param name="parameters">parameters = [q0,..., q_2n, x0,...,xn]</param>
     /// <returns>Generated InternalSplineFunction class.</returns>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <exception cref="NotImplementedException">Raises if vector of parameters was incorrect.</exception>
     public IFunction Bind(IVector parameters)
     {
         if (parameters.Count % 3 != 0) throw new ArgumentException("Incorrect parameters.");

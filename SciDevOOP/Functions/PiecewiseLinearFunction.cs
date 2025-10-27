@@ -11,7 +11,7 @@ class PiecewiseLinearFunction : IParametricFunction
     /// Represents a piecewise linear function of the form:
     /// f(x) = ax + b + c_0 * |x - x_0| + ... + c_n * |x - x_n|
     /// </summary>
-    class InternalPiecewiseLinearFunction : IDifferentiableFunction
+    class InternalPiecewiseLinearFunction : IDifferentiableFunction, IMeshable
     {
         private readonly double _h = 1e-8;
 
@@ -19,6 +19,8 @@ class PiecewiseLinearFunction : IParametricFunction
         public IVector? c; // b0, b1, ... bn;
         public double a;
         public double b;
+
+        IVector IMeshable.GetMesh() => xes is not null ? xes : new Vector();
 
         IVector IDifferentiableFunction.Gradient(IVector point)
         {
@@ -53,19 +55,31 @@ class PiecewiseLinearFunction : IParametricFunction
     /// <summary>
     /// Method, that binds parameters to function. Must be successfully tested!
     /// </summary>
-    /// <param name="parameters">parameters = [a, b, x0, x1, ... xn, c0, c1, ... cn]</param>
+    /// <param name="parameters">parameters = [a, b, c0, c1, ... cn, x0, x1, ... xn]</param>
     /// <returns>Generated InternalPiecewiseLinearFunction class.</returns>
     /// <exception cref="ArgumentException">Raises if input data was in incorrect format.</exception>
+    /// <exception cref="Exception">Raises in case of truly bad input data.</exception>
     public IFunction Bind(IVector parameters)
     {
         if ((parameters.Count - 2) % 2 != 0) throw new ArgumentException("Incorrect input data.");
         var n = (parameters.Count - 2) / 2;
-        return new InternalPiecewiseLinearFunction()
+        return n switch
         {
-            a = parameters[1],
-            b = parameters[0],
-            xes = new Vector(parameters.Skip(2).Take(n)),
-            c = new Vector(parameters.Skip(n + 2).Take(n))
+            0 => new InternalPiecewiseLinearFunction()
+            {
+                a = parameters[0],
+                b = parameters[1],
+                xes = null,
+                c = null
+            },
+            > 0 => new InternalPiecewiseLinearFunction()
+            {
+                a = parameters[0],
+                b = parameters[1],
+                c = new Vector(parameters.Skip(2).Take(n)),
+                xes = new Vector(parameters.Skip(n + 2).Take(n))
+            },
+            _ => throw new Exception("Woah, raised exception, that shouln't be raised.")
         };
     }
 }
