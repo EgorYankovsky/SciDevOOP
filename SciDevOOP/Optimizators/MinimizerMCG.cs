@@ -25,6 +25,7 @@ class MinimizerMCG : IOptimizator
     IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
+        _mesh = (function.Bind(initialParameters) is IMeshable) ? (function.Bind(initialParameters) as IMeshable)!.GetMesh() : default;
         try
         {
             if (minimumParameters is not null && initialParameters.Count != minimumParameters.Count)
@@ -45,23 +46,21 @@ class MinimizerMCG : IOptimizator
         {
             Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return sln;
+        return new Vector(sln.Concat(_mesh is not null ? _mesh : []));
     }
 
     private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters)
     {
         var k = 0;
-        var xCurr = new Vector(initialParameters.Select(p => p));
-        var s = new Vector([.. initialParameters.Select(p => 0)]);
-        if (function.Bind(xCurr) is IMeshable)
-            _mesh = (function.Bind(xCurr) as IMeshable)!.GetMesh();
+        var xCurr = new Vector(initialParameters.Take(initialParameters.Count - (_mesh is not null ? _mesh.Count : 0)));
+        var s = new Vector([.. xCurr.Select(p => 0)]);
 
         while (k < MaxIterations)
         {
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh!))));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -75,8 +74,8 @@ class MinimizerMCG : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xNext));
-            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xNext.Concat(_mesh!))));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh!))));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -169,7 +168,7 @@ class MinimizerMCG : IOptimizator
         var point = new Vector();
         for (var i = 0; i < x.Count; i++)
             point.Add(x[i] + lambda * s[i]);
-        var fun = function.Bind(point);
+        var fun = function.Bind(new Vector(point.Concat(_mesh!)));
         var value = objective.Value(fun);
         LimitingMethod ??= new BarrierMethod();
         LimitingMethod.Limit(ref value, point, _minimumParameters, _maximumParameters);
