@@ -5,6 +5,7 @@ using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.LevenbergMarquardtTools;
 using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
+using SciDevOOP.Functions;
 
 namespace SciDevOOP.Optimizators;
 
@@ -12,6 +13,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
 {
     private IVector? _minimumParameters;
     private IVector? _maximumParameters;
+    private IVector? _mesh;
 
     public int MaxIterations = 100;
     public double Tolerance = 1e-15;
@@ -23,6 +25,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
+        _mesh = (function.Bind(initialParameters) is IMeshable) ? (function.Bind(initialParameters) as IMeshable)!.GetMesh() : null;
         try
         {
             if (minimumParameters is not null && minimumParameters.Count != initialParameters.Count)
@@ -42,12 +45,12 @@ class MinimizerLevenbergMarquardt : IOptimizator
         {
             Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return sln;
+        return new Vector(sln.Concat(_mesh ?? new Vector()));
     }
 
     private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
-    {
-        var n = x0.Count;
+    {   
+        var n = x0.Count - _mesh?.Count;
         var lambda = LambdaInit;
         var k = 0;
 
@@ -85,7 +88,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
             for (var i = 0; i < n; i++) nextX.Add(x0[i] + h[i]);
 
             // Account next residual 
-            var nextResidual = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(nextX));
+            var nextResidual = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(new Vector(nextX.Concat(_mesh?? new Vector()))));
 
             // Account sum of residual squares.
             var nextCost = 0.5 * (nextResidual as IVectorMultiplicand)!.Multiplicate(nextResidual); // ComputeCost(residuals_next);
@@ -106,7 +109,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 residuals = nextResidual;
                 costCurr = nextCost;
                 // Account Jacobian at new point
-                J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(x0)) as IDenseMatrix)!.GetTransposed();
+                J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(new Vector(x0.Concat(_mesh ?? new Vector())))) as IDenseMatrix)!.GetTransposed();
                 // Reduce regularization parameter.
                 lambda = Math.Max(lambda / Nu, 1e-16);
             }
