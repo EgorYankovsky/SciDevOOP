@@ -130,15 +130,15 @@
 	\caption{Тестирование 3-х мерной линейной функции $P(\vec{x}) = 1 + x_1 + x_2$.}
 	\centering
 	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
+	\begin{tabularx}{1.0\textwidth}{| >{\centering\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Средний результат из 10 решений} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		\multirow{4}{*}{\centering{(0.89; 0.5; 0.5)}} & $L_1$ & \centering{9.985284E-001, 1.000726E+000, 1.001621E+000} \tabularnewline \cline{2-3}
 	
-		 & $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		 & $L_2$ & \centering{1.003186E+000, 9.977719E-001,	9,964673E-001} \tabularnewline \cline{2-3}
 	
-		 & $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		 & $L_{\inf}$ & \centering{9.988302E-001, 1.003419E+000, 9.985865E-001} \tabularnewline \cline{2-3}
 	
 		 & Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
@@ -151,13 +151,20 @@
 	\small
 	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Средний результат из 10 решений} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		\multirow{4}{*}{\raggedleft
+			\begin{tabular}{c}
+				 0.8, \\
+				 0.7, \\
+				 0.9, -0.78, -1.87, \\
+				 -1.0, 0.0, 1.0
+			\end{tabular}
+		} & $L_1$ & \centering{2.864295E-002, -1.044582E+000, 9.740291E-001, -9.856934E-001, 1.033343E+000} \tabularnewline \cline{2-3}
 		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		& $L_2$ & \centering{9.581629E-004, -1.100468E+000, 1.060370E+000, -1.067029E+000, 1.081162E+000} \tabularnewline \cline{2-3}
 		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		& $L_{\inf}$ & \centering{-1,847915E-002, -9.562990E-001, 9.900883E-001, -9.708578E-001, 9.495355E-001} \tabularnewline \cline{2-3}
 		
 		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
@@ -170,13 +177,13 @@
 	\small
 	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Средний результат из 10 решений} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		\multirow{4}{*}{\centering{(0.8, 0.7, 0.9, -0.28)}} & $L_1$ & \centering{9.760448E-001, 3.056967E+000, 3.025434E+000,	-1.009347E+000} \tabularnewline \cline{2-3}
 		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		& $L_2$ & \centering{1.043514E+000, 2.921941E+000, 3.004910E+000, -9.983161E-001} \tabularnewline \cline{2-3}
 		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		& $L_{\inf}$ & \centering{1.127008E+000, 3.080072E+000, 3.011509E+000, -1.007120E+000} \tabularnewline \cline{2-3}
 		
 		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
@@ -189,13 +196,19 @@
 	\small
 	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
 		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
+		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Средний результат из 10 решений} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+			\multirow{4}{*}{\raggedleft
+			\begin{tabular}{c}
+				0.5, 0.0, 1.47, -0.78, 1.88,\\
+				 -0.35, \\
+				0.0, 2.0, 5.0
+			\end{tabular}
+		} & $L_1$ & \centering{2.572843E+000, -3.772355E-001, 2.486581E+000, -2.242274E-001, 2.995627E-002, -3.614091E+000} \tabularnewline \cline{2-3}
 		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		& $L_2$ & \centering{2.500145E+000, -1.446680E-001, 2.490407E+000, -9.458615E-002, 2.340403E-002, -3.365737E+000} \tabularnewline \cline{2-3}
 		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		& $L_{\inf}$ & \centering{2.399551E+000, 1.817553E-001, 2.490943E+000, -6.092797E-002, 2.510118E-002, -3.336969E+000} \tabularnewline \cline{2-3}
 		
 		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
@@ -212,13 +225,9 @@
 		\hline
 		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		\multirow{2}{*}{\centering{(-1.5; 0.1; 1.0)}} & $L_1$ & \centering{1.000000E+000, 1.000000E+000, 1.000000E+000} \tabularnewline \cline{2-3}
 		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		& $L_2$ & \centering{1.000000E+000, 9.999999E-001, 9.999998E-001} \tabularnewline \hline
 	\end{tabularx}
 	\label{tab:testLineN2}
 \end{table}
@@ -231,53 +240,21 @@
 		\hline
 		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		\multirow{4}{*}{\raggedleft
+		\begin{tabular}{c}
+			0.7, \\
+			0.4, \\
+			0.1, 0.1, 0.2, \\
+			-1.0, 0.0, 1.0 \\
+		\end{tabular}} & $L_1$ & \centering{7.003582E-002, -8.814619E-001, 8.784511E-001, -9.392526E-001, 9.824676E-001} \tabularnewline \cline{2-3}
 		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		& $L_2$ & \centering{2,217045E-01
+			7,360733E-02
+			-7,448983E-02
+			7,741301E-02
+			3,293158E-01} \tabularnewline \hline
 	\end{tabularx}
 	\label{tab:testPW2}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование полиномиальной функции $P(x) = 1 + 3x + 3x^2 - x^3$.}
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:testPolynomial2}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование сплайна.}
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:testSpline2}
 \end{table}
 
 
@@ -291,13 +268,7 @@
 		\hline
 		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
+		\multirow{4}{*}{\centering{(-1.0, 0.1, 2.0)}} & $L_2$ & \centering{1.000000E+000, 1.000000E+000, 1.000000E+000} \tabularnewline \hline
 	\end{tabularx}
 	\label{tab:testLineN3}
 \end{table}
@@ -310,51 +281,14 @@
 		\hline
 		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
 		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
+		\multirow{4}{*}{\raggedleft
+			\begin{tabular}{c}
+				0.7, \\
+				0.4, \\
+				0.1, 0.1, 0.2, \\
+				-1.0, 0.0, 1.0 \\
+		\end{tabular}} & $L_2$ & \centering{9.585372E-15, -1.000000E+00, 1.000000E+00, -1.000000E+00, 1.000000E+00} \tabularnewline \hline
 		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
 	\end{tabularx}
 	\label{tab:testPW3}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование полиномиальной функции $P(x) = 1 + 3x + 3x^2 - x^3$.}
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:testPolynomial3}
-\end{table}
-
-\begin{table}
-	\caption{Тестирование сплайна.}
-	\centering
-	\small
-	\begin{tabularx}{1.0\textwidth}{| >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X | >{\raggedright\arraybackslash}X |}
-		\hline
-		\centering{Начальные параметры}  & \centering{Функционал} & \centering{Результат} \tabularnewline \hline    
-		
-		\multirow{4}{*}{\centering{(0.5; 0.5; 0.5)}} & $L_1$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_2$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& $L_{\inf}$ & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \cline{2-3}
-		
-		& Интеграл & \centering{0.00000000E+000; 0.00000000E+000; 0.00000000E+000} \tabularnewline \hline
-	\end{tabularx}
-	\label{tab:testSpline3}
 \end{table}

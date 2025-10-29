@@ -28,8 +28,32 @@ partial class Program
 {
     static void Main(string[] args)
     {
-        var optimizer = new MinimizerLevenbergMarquardt();
-        var fun = new PiecewiseLinearFunction();
-        TestPW(optimizer, fun);
+        IOptimizator optimizer = new MinimizerLevenbergMarquardt();
+        var fun = new LineFunctionN();
+        var points = Read("inputLineN.txt");
+        var initial = new Vector
+        {
+            -1.0, 0.1, 2.0
+        };
+        //var minimal = new Vector
+        //{
+        //    0.0, -2.0, 0.0, -1.0, -1.0, -4.0,
+        //    0.0, 2.0, 5.0
+        //};
+        //var maximal = new Vector
+        //{
+        //    4.0, 2.0, 4.47, 1.78, 2.88, 0.35,
+        //    0.0, 2.0, 5.0
+        //};
+
+        var functional = new L2Norm()
+        {
+            points = points
+        };
+        var res = optimizer.Minimize(functional, fun, initial/*, minimal, maximal*/);
+        Write(res);
+        
+        
+        //TestLineN(optimizer, fun);
     }
 }

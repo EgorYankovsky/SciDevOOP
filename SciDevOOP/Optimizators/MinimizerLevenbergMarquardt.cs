@@ -49,8 +49,8 @@ class MinimizerLevenbergMarquardt : IOptimizator
     }
 
     private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
-    {   
-        var n = x0.Count - _mesh?.Count;
+    {
+        var n = x0.Count - (_mesh is not null ? _mesh.Count : 0);
         var lambda = LambdaInit;
         var k = 0;
 
