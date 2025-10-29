@@ -22,7 +22,7 @@ class MinimizerMCG : IOptimizator
 
     public ILimitingMethod? LimitingMethod;
 
-    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
+    IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
         try
@@ -31,8 +31,9 @@ class MinimizerMCG : IOptimizator
                 throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
             if (maximumParameters is not null && initialParameters.Count != maximumParameters.Count)
                 throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
-            if (objective is not IDifferentiableFunctional) 
+            if (objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+
             (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = Method(objective, function, initialParameters);
         }
