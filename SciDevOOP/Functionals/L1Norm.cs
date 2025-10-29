@@ -23,23 +23,6 @@ class L1Norm : IDifferentiableFunctional
         return sum;
     }
 
-    //IVector IDifferentiableFunctional.Gradient(IFunction function)
-    //{
-    //    var gradient = new Vector();
-    //
-    //
-    //
-    //
-    //    foreach (var (x, y) in points)
-    //    {
-    //        var param = new Vector() { x };
-    //        var diff = function.Value(param) - y;
-    //        var derivative = diff > 0 ? 1 : (double)(diff < 0 ? -1 : 0);
-    //        gradient.Add(derivative);
-    //    }
-    //    return gradient;
-    //}
-
     IVector IDifferentiableFunctional.Gradient(IFunction function)
     {
         if (points is null) throw new ArgumentNullException("Points is null at L1Norm");

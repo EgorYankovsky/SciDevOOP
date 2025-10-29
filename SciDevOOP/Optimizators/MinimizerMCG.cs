@@ -5,6 +5,7 @@ using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.GradientableAlgorithmTools;
 using SciDevOOP.Optimizators.GradientableAlgorithmTools.LimitingMethods;
+using SciDevOOP.Functions;
 
 namespace SciDevOOP.Optimizators;
 
@@ -12,6 +13,7 @@ class MinimizerMCG : IOptimizator
 {
     private IVector? _minimumParameters;
     private IVector? _maximumParameters;
+    private IVector? _mesh;
 
     public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
@@ -20,7 +22,7 @@ class MinimizerMCG : IOptimizator
 
     public ILimitingMethod? LimitingMethod;
 
-    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
+    IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
         try
@@ -29,8 +31,9 @@ class MinimizerMCG : IOptimizator
                 throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
             if (maximumParameters is not null && initialParameters.Count != maximumParameters.Count)
                 throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
-            if (objective is not IDifferentiableFunctional) 
+            if (objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+
             (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = Method(objective, function, initialParameters);
         }
@@ -48,8 +51,10 @@ class MinimizerMCG : IOptimizator
     private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters)
     {
         var k = 0;
-        var xCurr = new Vector(initialParameters.Select(p => p));        
-        var s = new Vector([..initialParameters.Select(p => 0)]);
+        var xCurr = new Vector(initialParameters.Select(p => p));
+        var s = new Vector([.. initialParameters.Select(p => 0)]);
+        if (function.Bind(xCurr) is IMeshable)
+            _mesh = (function.Bind(xCurr) as IMeshable)!.GetMesh();
 
         while (k < MaxIterations)
         {
@@ -84,7 +89,7 @@ class MinimizerMCG : IOptimizator
             for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
             var xDiffNorm = xDiff.Norma();
             if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
-            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+            else if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
             if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
                 var a = 0; var b = 0;
@@ -103,8 +108,6 @@ class MinimizerMCG : IOptimizator
             }
             xCurr = xNext;
             k++;
-            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
-            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
         }
         Console.WriteLine($"MCG reached max iterations: {k}");
         return xCurr;
@@ -161,7 +164,6 @@ class MinimizerMCG : IOptimizator
         return 0.5 * (x1 + x2);
     }
 
-    [Obsolete(message: "Method should be deleted.", false)]
     private double EvaluateFunction(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda)
     {
         var point = new Vector();

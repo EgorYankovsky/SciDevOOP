@@ -4,14 +4,15 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools;
+using SciDevOOP.Functions;
 
 namespace SciDevOOP.Optimizators;
 
 class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureChangeLaw temperatureChangeLaw) : IOptimizator
 {
-    public readonly uint MaxIterations = 1000;
-    public readonly double MinTemperature = 0.001;
-
+    public readonly uint MaxIterations = 100_000;
+    public readonly double MinTemperature = 0.0001;
+    public double InitialTemperature = 1000.0D;
 
     private readonly ITemperatureChangeLaw _temperatureChangeLaw = temperatureChangeLaw;
     private readonly ITransitionRule _transitionRule = transitionRule;
@@ -27,7 +28,7 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
         var minFunctionalValue = objective.Value(f);
 
         var rnd = new Random();
-        var ti = 100.0; // Current temperature.
+        var ti = InitialTemperature; // Current temperature.
 
         uint outerIter = 0;
         try
@@ -41,6 +42,12 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
                     {
                         var sign = Math.Pow(-1, rnd.Next(2));
                         parameters[ii] = minParameters[ii] + sign * (minimumParameters[ii] + (maximumParameters[ii] - minimumParameters[ii]) * rnd.NextDouble());
+                    }
+                    if (f is IMeshable)
+                    {
+                        var mesh = (f as IMeshable)!.GetMesh();
+                        for (int ii = 1; ii <= mesh.Count; ++ii)
+                            parameters[^ii] = mesh[^ii];
                     }
 
                     var newFunctionalValue = objective.Value(function.Bind(parameters));
