@@ -28,8 +28,8 @@ partial class Program
 {
     static void Main(string[] args)
     {
-        var optimizer = new MinimizerMCG();
-        var fun = new SplineFunction();
-        TestSpline(optimizer, fun);
+        var optimizer = new MinimizerLevenbergMarquardt();
+        var fun = new PiecewiseLinearFunction();
+        TestPW(optimizer, fun);
     }
 }

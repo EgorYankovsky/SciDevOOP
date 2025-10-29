@@ -36,7 +36,7 @@ class PiecewiseLinearFunction : IParametricFunction
                 var derivative = (f1.Value(point) - baseValue) / _h;
                 gradient.Add(derivative);
             }
-            gradient.AddRange(xes!.Select(x => 0.0));
+            //gradient.AddRange(xes!.Select(x => 0.0));
             return gradient;
         }
 

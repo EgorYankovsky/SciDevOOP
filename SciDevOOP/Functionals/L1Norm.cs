@@ -26,6 +26,8 @@ class L1Norm : IDifferentiableFunctional
     IVector IDifferentiableFunctional.Gradient(IFunction function)
     {
         if (points is null) throw new ArgumentNullException("Points is null at L1Norm");
+        if (function is not IDifferentiableFunction)
+            throw new ArgumentNullException("Can't find gradient of not IDifferentiableFunction.");
         var gradient = new Vector();
         foreach (var point in points)
         {

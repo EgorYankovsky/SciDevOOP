@@ -8,7 +8,18 @@ partial class Program
 {
     static void TestLineN(IOptimizator optimizator, IParametricFunction f)
     {
-
+        var points = Read();
+        var initial = new Vector
+        {
+            0.89,
+            0.63
+        };
+        var functional = new L2Norm()
+        {
+            points = points
+        };
+        var res = optimizator.Minimize(functional, f, initial);
+        Write(res);
     }
 
     static void TestPW(IOptimizator optimizator, IParametricFunction f)
@@ -22,7 +33,7 @@ partial class Program
             0.1, 0.1, 0.2,
             -1.0, 0.0, 1.0
         };
-        var functional = new L1Norm
+        var functional = new L2Norm
         {
             points = points
         };

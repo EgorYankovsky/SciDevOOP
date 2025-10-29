@@ -12,6 +12,8 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
     IVector IDifferentiableFunctional.Gradient(IFunction function)
     {
         if (points is null) throw new ArgumentNullException("Points is null at L2Norm");
+        if (function is not IDifferentiableFunction)
+            throw new ArgumentNullException("Can't find gradient of not IDifferentiableFunction.");
         var gradient = new Vector();
         var l2Value = ((IFunctional)this).Value(function);
 
@@ -35,19 +37,18 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
     IMatrix ILeastSquaresFunctional.Jacobian(IFunction function)
     {
         if (points is null) throw new ArgumentNullException("Points is null at L2Norm");
+        if (function is not IDifferentiableFunction)
+            throw new ArgumentNullException("Can't find gradient of not IDifferentiableFunction.");
         var Jacobian = new Matrix();
-        if (function is IDifferentiableFunction differentiableFunction)
+        for (var i = 0; i < points.Count; i++)
         {
-            for (var i = 0; i < points.Count; i++)
-            {
-                var input = new Vector(points[i].SkipLast(1));
-                var row = new Vector();
-                var derivatives = differentiableFunction.Gradient(input);
-                // ∂r_i/∂θ_j = ∂f(x_i)/∂θ_j
-                for (var j = 0; j < derivatives.Count; j++)
-                    row.Add(derivatives[j]);
-                Jacobian.Add(row);
-            }
+            var input = new Vector(points[i].SkipLast(1));
+            var row = new Vector();
+            var derivatives = (function as IDifferentiableFunction)!.Gradient(input);
+            // ∂r_i/∂θ_j = ∂f(x_i)/∂θ_j
+            for (var j = 0; j < derivatives.Count; j++)
+                row.Add(derivatives[j]);
+            Jacobian.Add(row);
         }
         return Jacobian;
     }
