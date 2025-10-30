@@ -5,6 +5,7 @@ using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.GradientableAlgorithmTools;
 using SciDevOOP.Optimizators.GradientableAlgorithmTools.LimitingMethods;
+using SciDevOOP.Functions;
 
 namespace SciDevOOP.Optimizators;
 
@@ -12,7 +13,7 @@ class MinimizerMCG : IOptimizator
 {
     private IVector? _minimumParameters;
     private IVector? _maximumParameters;
-
+    private IVector? _mesh;
 
     public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
@@ -21,17 +22,19 @@ class MinimizerMCG : IOptimizator
 
     public ILimitingMethod? LimitingMethod;
 
-    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
+    IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
+        _mesh = (function.Bind(initialParameters) is IMeshable) ? (function.Bind(initialParameters) as IMeshable)!.GetMesh() : default;
         try
         {
             if (minimumParameters is not null && initialParameters.Count != minimumParameters.Count)
                 throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
             if (maximumParameters is not null && initialParameters.Count != maximumParameters.Count)
                 throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
-            if (objective is not IDifferentiableFunctional) 
+            if (objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"MCG minimizer can't handle with {objective.GetType().Name} functional class.");
+
             (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = Method(objective, function, initialParameters);
         }
@@ -43,21 +46,21 @@ class MinimizerMCG : IOptimizator
         {
             Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return sln;
+        return new Vector(sln.Concat(_mesh is not null ? _mesh : []));
     }
 
     private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters)
     {
         var k = 0;
-        var xCurr = new Vector(initialParameters.Select(p => p));        
-        var s = new Vector([..initialParameters.Select(p => 0)]);
+        var xCurr = new Vector(initialParameters.Take(initialParameters.Count - (_mesh is not null ? _mesh.Count : 0)));
+        var s = new Vector([.. xCurr.Select(p => 0)]);
 
         while (k < MaxIterations)
         {
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh ?? new Vector()))));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -71,8 +74,8 @@ class MinimizerMCG : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xNext));
-            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(xCurr));
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xNext.Concat(_mesh ?? new Vector()))));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh ?? new Vector()))));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -85,7 +88,7 @@ class MinimizerMCG : IOptimizator
             for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
             var xDiffNorm = xDiff.Norma();
             if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
-            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+            else if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
             if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
                 var a = 0; var b = 0;
@@ -104,8 +107,6 @@ class MinimizerMCG : IOptimizator
             }
             xCurr = xNext;
             k++;
-            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
-            if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current vector's norm: {sNorm:E15}");
         }
         Console.WriteLine($"MCG reached max iterations: {k}");
         return xCurr;
@@ -162,13 +163,12 @@ class MinimizerMCG : IOptimizator
         return 0.5 * (x1 + x2);
     }
 
-    [Obsolete(message: "Method should be deleted.", false)]
     private double EvaluateFunction(IFunctional objective, IParametricFunction function, IVector x, IVector s, double lambda)
     {
         var point = new Vector();
         for (var i = 0; i < x.Count; i++)
             point.Add(x[i] + lambda * s[i]);
-        var fun = function.Bind(point);
+        var fun = function.Bind(new Vector(point.Concat(_mesh ?? new Vector())));
         var value = objective.Value(fun);
         LimitingMethod ??= new BarrierMethod();
         LimitingMethod.Limit(ref value, point, _minimumParameters, _maximumParameters);

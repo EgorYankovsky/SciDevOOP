@@ -5,11 +5,16 @@ using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.LevenbergMarquardtTools;
 using SciDevOOP.Optimizators.LevenbergMarquardtTools.Solvers;
+using SciDevOOP.Functions;
 
 namespace SciDevOOP.Optimizators;
 
 class MinimizerLevenbergMarquardt : IOptimizator
 {
+    private IVector? _minimumParameters;
+    private IVector? _maximumParameters;
+    private IVector? _mesh;
+
     public int MaxIterations = 100;
     public double Tolerance = 1e-15;
     public double LambdaInit = 0.01;
@@ -20,10 +25,16 @@ class MinimizerLevenbergMarquardt : IOptimizator
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
+        _mesh = (function.Bind(initialParameters) is IMeshable) ? (function.Bind(initialParameters) as IMeshable)!.GetMesh() : null;
         try
         {
+            if (minimumParameters is not null && minimumParameters.Count != initialParameters.Count)
+                throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            if (maximumParameters is not null && maximumParameters.Count != initialParameters.Count)
+                throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
             if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
+            (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = LevenbergMarquardt(objective, function, initialParameters);
         }
         catch (ArgumentException argEx)
@@ -34,12 +45,12 @@ class MinimizerLevenbergMarquardt : IOptimizator
         {
             Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return sln;
+        return new Vector(sln.Concat(_mesh ?? new Vector()));
     }
 
-    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0, IVector? minimal = null, IVector? maximal = null)
+    private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
     {
-        var n = x0.Count;
+        var n = x0.Count - (_mesh is not null ? _mesh.Count : 0);
         var lambda = LambdaInit;
         var k = 0;
 
@@ -54,7 +65,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
             var gradient = (J as IMatrixMultiplicand)!.Multiplicate(residuals);
 
             // Check gradient's norm.
-            if ((gradient as INormable)!.Norma() < Tolerance) return x0;
+            if ((gradient as INormable)!.Norma() < Tolerance) return GetLimitedResult(x0);
 
             // Hessian generation: J^T * J
             var Jt = (J as IDenseMatrix)!.GetTransposed();
@@ -77,7 +88,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
             for (var i = 0; i < n; i++) nextX.Add(x0[i] + h[i]);
 
             // Account next residual 
-            var nextResidual = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(nextX));
+            var nextResidual = (objective as ILeastSquaresFunctional)!.Residual(function.Bind(new Vector(nextX.Concat(_mesh?? new Vector()))));
 
             // Account sum of residual squares.
             var nextCost = 0.5 * (nextResidual as IVectorMultiplicand)!.Multiplicate(nextResidual); // ComputeCost(residuals_next);
@@ -98,7 +109,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 residuals = nextResidual;
                 costCurr = nextCost;
                 // Account Jacobian at new point
-                J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(x0)) as IDenseMatrix)!.GetTransposed();
+                J = ((objective as ILeastSquaresFunctional)!.Jacobian(function.Bind(new Vector(x0.Concat(_mesh ?? new Vector())))) as IDenseMatrix)!.GetTransposed();
                 // Reduce regularization parameter.
                 lambda = Math.Max(lambda / Nu, 1e-16);
             }
@@ -107,15 +118,33 @@ class MinimizerLevenbergMarquardt : IOptimizator
                 // Failed step - increase regularization parameter.
                 lambda *= Nu;
                 // Return if lambda too big.
-                if (lambda > 1e16) return x0;
+                if (lambda > 1e16) return GetLimitedResult(x0);
             }
-            if ((h as INormable)!.Norma() < Tolerance * (1 + (x0 as INormable)!.Norma())) return x0;
-            if (Math.Abs(actualReduction) < Tolerance) return x0;
+            if ((h as INormable)!.Norma() < Tolerance * (1 + (x0 as INormable)!.Norma())) return GetLimitedResult(x0);
+            if (Math.Abs(actualReduction) < Tolerance) return GetLimitedResult(x0);
             k++;
         }
-        return x0;
+        return GetLimitedResult(x0);
     }
 
+
+    /// <summary>
+    /// Method, that limits result vector.
+    /// </summary>
+    /// <param name="ans">Not limited result vector.</param>
+    /// <returns>Vector with minimal and maximal limitations.</returns>
+    private IVector GetLimitedResult(IVector ans)
+    {
+        if (_minimumParameters is not null)
+            for (var i = 0; i < ans.Count; ++i)
+                if (ans[i] < _minimumParameters[i])
+                    ans[i] = _minimumParameters[i];
+        if (_maximumParameters is not null)
+            for (var i = 0; i < ans.Count; ++i)
+                if (ans[i] > _maximumParameters[i])
+                    ans[i] = _maximumParameters[i];
+        return ans;
+    }
 
     private double ComputePredictedReduction(IMatrix J, IVector gradient, IVector h, double lambda, int dataCount)
     {
