@@ -1,6 +1,7 @@
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
+using System.Text;
 using System.Xml;
 
 namespace SciDevOOP.Functions;
@@ -11,14 +12,24 @@ class PiecewiseLinearFunction : IParametricFunction
     /// Represents a piecewise linear function of the form:
     /// f(x) = ax + b + c_0 * |x - x_0| + ... + c_n * |x - x_n|
     /// </summary>
-    class InternalPiecewiseLinearFunction : IDifferentiableFunction, IMeshable
+    class InternalPiecewiseLinearFunction : IDifferentiableFunction, IMeshable, IWritableFunction
     {
         private readonly double _h = 1e-8;
 
         public IVector? xes; // x0, x1, ... xn_1.
-        public IVector? c; // b0, b1, ... bn;
+        public IVector? c; // c0, c1, ... cn;
         public double a;
         public double b;
+
+        string IWritableFunction.ToString()
+        {
+            StringBuilder sb = new();
+            sb.AppendLine($"a = {a}");
+            sb.AppendLine($"b = {b}");
+            for (int i = 0; i < (c?.Count ?? 0); ++i)
+                sb.AppendLine($"c_{i} = {c![i]}");
+            return sb.ToString();
+        }
 
         IVector IMeshable.GetMesh() => xes is not null ? xes : new Vector();
 

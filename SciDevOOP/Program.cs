@@ -62,7 +62,7 @@ partial class Program
 
 
         // 6. Solve minimization problem.
-        var res = optimizer.Minimize(functional, fun, initial/*, minimal, maximal*/);
+        var slnParams = optimizer.Minimize(functional, fun, initial/*, minimal, maximal*/);
 
 
         // 7. Write solution.
@@ -73,6 +73,6 @@ partial class Program
          *      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\ as output folder
          *      ! also you can set here a random folder.
         */
-        Write(res);
+        Write((fun.Bind(slnParams) as IWritableFunction)!);
     }
 }

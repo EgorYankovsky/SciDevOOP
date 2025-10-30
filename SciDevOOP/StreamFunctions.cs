@@ -1,3 +1,5 @@
+using SciDevOOP.Functions;
+using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.IO;
 using SciDevOOP.IO.Console;
 using SciDevOOP.IO.Txt;
@@ -75,6 +77,24 @@ partial class Program
     }
 
     /// <summary>
+    /// Method, that writes prettified result at console.
+    /// </summary>
+    /// <param name="fun">Binded function with result parameters.</param>
+    static void Write(IWritableFunction fun)
+    {
+        var writer = new ConsoleWriter();
+        try
+        {
+            writer.Write(fun);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Unexpected exception:\n{ex}.");
+        }
+    }
+
+
+    /// <summary>
     /// Method, that writes result at console.
     /// </summary>
     /// <param name="answer">Vector of solution.</param>
@@ -84,6 +104,38 @@ partial class Program
         try
         {
             writer!.Write(answer);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unexpected exception:\n{ex}.");
+        }
+    }
+
+    static void Write(IWritableFunction fun, string path)
+    {
+        var extension = string.Empty;
+        IWriter? writer = null;
+        try
+        {
+            extension = path.Split('\\').Last().Split('.').Last().ToLower();
+            writer = extension switch
+            {
+                "txt" => new TxtWriter(path),
+                _ => throw new ArgumentException()
+            };
+            writer!.Write(fun);
+        }
+        catch (NotSupportedException nsEx)
+        {
+            Console.WriteLine(nsEx.Message);
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine($"Can't find file: {ex.Message}.");
+        }
+        catch (ArgumentException)
+        {
+            Console.WriteLine($"Unexpected file extension: {extension}");
         }
         catch (Exception ex)
         {

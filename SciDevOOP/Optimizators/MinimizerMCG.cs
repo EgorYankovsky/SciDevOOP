@@ -19,10 +19,9 @@ class MinimizerMCG : IOptimizator
     public double Tolerance = 1e-15;
     public double DichotomyEps = 1e-15;
     public double H = 1e-15; // For gradient.
-
     public ILimitingMethod? LimitingMethod;
 
-    IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
+    public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
         _mesh = (function.Bind(initialParameters) as IMeshable)?.GetMesh() ?? new Vector([]);
@@ -60,7 +59,7 @@ class MinimizerMCG : IOptimizator
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh!))));
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh))));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -74,8 +73,8 @@ class MinimizerMCG : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xNext.Concat(_mesh!))));
-            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh!))));
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xNext.Concat(_mesh))));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh))));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -88,7 +87,7 @@ class MinimizerMCG : IOptimizator
             for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
             var xDiffNorm = xDiff.Norma();
 
-            Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
+            //Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
             //else if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
             if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
@@ -102,17 +101,17 @@ class MinimizerMCG : IOptimizator
 
                 if (a + b == 0)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine($"MCG answer found for {k} iterations.");
-                    Console.WriteLine($"sNorm: {sNorm}");
-                    Console.WriteLine($"xDiffNorm: {xDiffNorm}");
+                    //Console.WriteLine();
+                    //Console.WriteLine($"MCG answer found for {k} iterations.");
+                    //Console.WriteLine($"sNorm: {sNorm}");
+                    //Console.WriteLine($"xDiffNorm: {xDiffNorm}");
                     return xNext;
                 }
             }
             xCurr = xNext;
             k++;
         }
-        Console.WriteLine($"MCG reached max iterations: {k}");
+        //Console.WriteLine($"MCG reached max iterations: {k}");
         return xCurr;
     }
 
