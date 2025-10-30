@@ -14,22 +14,22 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
         if (points is null) throw new ArgumentNullException("Points is null at L2Norm");
         if (function is not IDifferentiableFunction)
             throw new ArgumentNullException("Can't find gradient of not IDifferentiableFunction.");
+
         var gradient = new Vector();
         var l2Value = ((IFunctional)this).Value(function);
-
-        if (Math.Abs(l2Value) < 1e-15)
-        {
-            for (var i = 0; i < points.Count; i++)
-                gradient.Add(0);
-            return gradient;
-        }
 
         foreach (var point in points)
         {
             var fi = point.Last();
             var param = new Vector(point.SkipLast(1));
+            var gradF = (function as IDifferentiableFunction)!.Gradient(param);
+            if (Math.Abs(l2Value) < 1e-15) return new Vector([..param.Select(p => 0)]);
+            if (gradient.Count == 0)
+                for (var i = 0; i < gradF.Count; ++i) gradient.Add(0);
             var diff = function.Value(param) - fi;
-            gradient.Add(diff / l2Value);
+            //gradient.Add(diff / l2Value);
+            for (var i = 0; i < gradient.Count; ++i) gradient[i] += diff * gradF[i] / l2Value;
+
         }
         return gradient;
     }
