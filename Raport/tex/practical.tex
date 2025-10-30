@@ -1,30 +1,77 @@
-\chapter{Практическая часть}
+\chapter{Рекомендации по использованию программы}
 
-\section{Функционалы}
-При выполнении задания были реализованы следующие функционалы:
-\begin{itemize}
-	\item $L_1$ \textsl{норма разности} -- для вектора представляющая собой сумму модулей всех его элементов - ${||x||}_1 = \sum_{i}{|x_i|}$;
-	\item $L_2$ \textsl{норма разности} -- является геометрическим расстоянием между двумя точками в многомерном пространстве, вычисляемым по теореме Пифагора, - ${||x||}_2 = \sqrt{\sum_{i}{{x_i}^2}}$;
-	\item $L_{inf}$ \textsl{норма разности} -- предельный случай - ${||x||}_{\inf} = \max{|x_i|}$;
-	\item \textsl{Интеграл по некоторой области (численно)} -- $V = \int_a^b f(x)dx$.
-\end{itemize}
+Входная точка запуска программы находится в файле \texttt{Program.cs}. Содержимое файла выглядит следующим образом:
 
-\section{Функции}
+\begin{minted}[linenos=false, numbersep=0pt, frame=none]{csharp}
+partial class Program
+{
+	static void Main(string[] args)
+	{
+		// 1. Choose IOptimizator: MinimizerLevenbergMarquardt, MinimizerMCG, MinimizerSimulatedAnnealing.
+		IOptimizator optimizer = new MinimizerLevenbergMarquardt();
+		// 2. Choose IParametricFunction: LineFunctionN, PiecewiseLinearFunction, Polynomial, SplineFunction.
+		var fun = new PiecewiseLinearFunction();
+		// 3. Read points.
+		/*
+		* Reading support console and TXT input.
+		*  - to use console input call as: Read()
+		*  - to use txt input call as: Read("file_name.txt")
+		*      ! basicly, it reads files from \\SciDevOOP\\bin\\Resources\\ folder
+		*      ! also you can set here a full path of EXISTING! file.
+		*/
+		var points = Read("inputPW.txt");
+		// 4. Initialize vector of parameters.
+		var initial = new Vector
+		{
+			0.7,
+			0.4,
+			0.1, 0.1, 0.2,
+			-1.0, 0.0, 1.0
+		};
+		// 4a. If necessary - initialize vector of minimal or maximal parameters.
+		var minimal = new Vector
+		{
+			0.0, -2.0, 0.0, -1.0, -1.0, -4.0,
+			0.0, 2.0, 5.0
+		};
+		var maximal = new Vector
+		{
+			4.0, 2.0, 4.47, 1.78, 2.88, 0.35,
+			0.0, 2.0, 5.0
+		};
+		// 5. Choose IFunctional: IntegrationNorm, L1Norm, L2Norm, LInfNorm.
+		var functional = new L2Norm()
+		{
+			points = points
+		};
+		// 6. Solve minimization problem.
+		var res = optimizer.Minimize(functional, fun, initial/*, minimal, maximal*/);
+		// 7. Write solution.
+		/*
+		*  Writing support console and TXT output.
+		*  - to use console output use as: Write(res)
+		*  - to use txt output use as: Read(res, "file_name.txt")
+		*      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\ as output folder
+		*      ! also you can set here a random folder.
+		*/
+		Write(res);
+	}
+}
+\end{minted}
 
-При реализации функций в основе лежали следующие идеи их представления.
+Работа всей программы состоит из 7 частей.
 
-\begin{itemize}
-		\item \textsl{Линейная функция в n-мерном пространстве} будет искаться в виде $f(\overline{x}) = c_0 + c_1 \cdot x_1 + c_2 \cdot x_2 + ... + c_n \cdot x_n$. Вектор входных параметров для данной функции выглядит следующим образом: [$c_0, c_1, ..., c_n$].
-		\item \textsl{Полином n-й степени в одномерном пространстве} будет искаться в виде $P(x) = c_0 + c_1 \cdot x + c_2 \cdot x^2 + ... + c_n \cdot x^n$. Вектор входных параметров для данной функции выглядит следующим образом: [$c_0, c_1, ..., c_n$].
-		\item \textsl{Кусочно-линейную функции} представим в виде системы уравнений $a \cdot x + b \cdot y = c, \forall x \in [x_i, x_{i + 1}]$. Тогда вектор входных параметров будет иметь вид: $[x0, x1, ... x_{n - 1}, a_0, a_1, ... a_n, b_0, b_1, ... b_n, c_0, c_1, ... c_n]$, где $[x_0, x_1, ... x_{n-1}]$ - координаты точек разлома, $[a_0, a_1, ... a_n]$ - коэффициенты при $x$, $[b_0, b_1, ... b_n]$ - коэффициенты при $y$, $[c_0, c_1, ... c_n]$ - свободные коэффициенты.
-		\item \textsl{Сглаживающий сплайн} вида $S(x) = \sum_{i = 0}^{2n} q_i \cdot \psi_i(x)$ на эрмитовых базисных функциях. Вектор входных параметров определяется видом: $[q_0, ..., q_{2n}, x_0, ..., x_n]$.
+\begin{enumerate}
+	\item \textbf{Выбор метода оптимизации.} Пользователю предлагается выбрать 1 из реализованных методов: Метод симуляции отжига, Метод сопряжённых градиентов и алгоритм Левенберга — Марквардта.
+	\begin{itemize}
+		\item По умолчанию, Метод симуляции отжига использует в качестве закона изменения температуры закон Коши (\texttt{BasketFiring}), а правило перехода используется метод последовательного улучшения (\texttt{BasketFiring}). Функционал программы позволяет пользователю выбрать и другие реализованные законы изменения температуры и правила перехода, описанные в теоретической части.
+		\item При работе с алгоритмами, требующими дифференцируемый функционал, как параметр решения задачи оптимизации, пользователю также предлагается выбор из двух методов ограничения допустимых параметров: методы штрафных и барьерных функций. По умолчанию ставятся штрафные.
+		\item При решении задачи минимизации функционала методом Левенберга — Марквардта, предлагается указать решатель СЛАУ. Допустимые реализации: метод Гаусса и ?LU-разложение?. По умолчанию стоит метод Гаусса.
 	\end{itemize}
-\section{Методы оптимизации}
-
-В качестве методов оптимизации были реализованы следующие алгоритмы:
-
-\begin{itemize}
-	\item универсальный -- \textsl{Алгоритм имитации отжига};
-	\item требующий \texttt{IDifferentiableFunctional} -- \textsl{Метод сопряжённых градиентов};
-	\item требующий \texttt{ILeastSquaresFunctional} -- \textsl{Алгоритм Левенберга — Марквардта}.
-\end{itemize}
+	\item \textbf{Выбор функции.} Пользователю предлагается выбрать 1 из реализованных функций: линейная функция в n-мерном пространстве, кусочно-линейная функция, полином n-ой степени и сглаживающий сплайн на эрмитовых базисных функциях.
+	\item \textbf{Чтение точек.} Поддерживается чтение из консоли, а также *.txt файлов. Для чтения с консоли в функцию \texttt{Read} не нужно передавать никаких параметров. Для чтения данных с файлов необходимо указать полный путь расположения файла. Также определённый набор тестовых входных файлов находится в директории \texttt{./SciDevOOP/bin/Resources/} относительно файла решения \texttt{SciDevOOP.sln}. При необходимости чтения данных из этого файла пользователь может указать название файла, без полного пути к нему.
+	\item \textbf{Инициализация вектора начальных параметров}, а также при необходимости минимальных и максимальных.
+	\item \textbf{Выбор функционала для минимизации.}
+	\item \textbf{Решение задачи минимизации.}
+	\item \textbf{Вывод точек.}
+\end{enumerate}
