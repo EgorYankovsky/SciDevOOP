@@ -1,3 +1,4 @@
+using System.Text;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
@@ -10,10 +11,18 @@ class LineFunctionN : IParametricFunction
     /// Represents a line function at N dimension of the form:
     /// F = c0 + c1*x1 + c2*x2 + ... + cn*xn.
     /// </summary>
-    class InternalLineFunctionN : IDifferentiableFunction
+    class InternalLineFunctionN : IDifferentiableFunction, IWritableFunction
     {
         private readonly double _h = 1e-8;
         public IVector? coefficients;
+
+        string IWritableFunction.ToString()
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < (coefficients?.Count ?? 0); ++i)
+                sb.AppendLine($"c_{i} = {coefficients![i]}");
+            return sb.ToString();
+        }
 
         IVector IDifferentiableFunction.Gradient(IVector point)
         {

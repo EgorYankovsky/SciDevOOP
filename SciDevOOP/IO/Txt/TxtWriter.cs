@@ -1,3 +1,5 @@
+using SciDevOOP.Functions;
+
 namespace SciDevOOP.IO.Txt;
 
 public class TxtWriter : IWriter
@@ -24,5 +26,13 @@ public class TxtWriter : IWriter
         using var sw = new StreamWriter(_file.FullName);
         foreach (var value in values)
             sw.WriteLine(value);
+    }
+
+    public void Write(IWritableFunction function)
+    {
+        if (!_file!.Exists) throw new FileNotFoundException(_file.FullName);
+        if (_file.IsReadOnly) throw new NotSupportedException($"Writing at {_file.FullName} is not supported.");
+        using var sw = new StreamWriter(_file.FullName);
+        sw.WriteLine(function.ToString());
     }
 }

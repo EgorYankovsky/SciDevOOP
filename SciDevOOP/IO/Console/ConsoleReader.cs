@@ -4,6 +4,7 @@ public class ConsoleReader : IReader
 {
     public IList<IList<double>>? Read()
     {
+        System.Console.WriteLine("Insert values: ");
         IList<IList<double>>? result = null;
         result = [];
         var input = System.Console.ReadLine();

@@ -1,3 +1,4 @@
+using System.Text;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 
@@ -9,9 +10,17 @@ class Polynomial : IParametricFunction
     /// Represents a polynomial function of the form:
     /// P(x) = c_0 + c_1 * x + c_2 * x^2 + ... + c_n * x^n.
     /// </summary>
-    class InternalPolynomial : IFunction
+    class InternalPolynomial : IFunction, IWritableFunction
     {
         public IVector? coefficients;
+
+        string IWritableFunction.ToString()
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < (coefficients?.Count ?? 0); ++i)
+                sb.AppendLine($"c_{i} = {coefficients![i]}");
+            return sb.ToString();
+        }
 
         double IFunction.Value(IVector point)
         {

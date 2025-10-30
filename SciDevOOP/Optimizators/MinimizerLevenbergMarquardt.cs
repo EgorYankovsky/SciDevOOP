@@ -25,15 +25,23 @@ class MinimizerLevenbergMarquardt : IOptimizator
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
-        _mesh = (function.Bind(initialParameters) is IMeshable) ? (function.Bind(initialParameters) as IMeshable)!.GetMesh() : null;
+        _mesh = (function.Bind(initialParameters) as IMeshable)?.GetMesh() ?? new Vector([]);
         try
         {
             if (minimumParameters is not null && minimumParameters.Count != initialParameters.Count)
-                throw new ArgumentException($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            {
+                Console.WriteLine($"Minimum parameters amount {minimumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+                minimumParameters = null;
+            }
             if (maximumParameters is not null && maximumParameters.Count != initialParameters.Count)
-                throw new ArgumentException($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+            {
+                Console.WriteLine($"Maximum parameters amount {maximumParameters.Count} not equal to initial parameters amount {initialParameters.Count}.");
+                maximumParameters = null;
+            }
             if (objective is not ILeastSquaresFunctional || objective is not IDifferentiableFunctional)
                 throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {objective.GetType().Name} functional class.");
+            if (function.Bind(initialParameters) is not IDifferentiableFunction)
+                throw new ArgumentException($"Levenberg-Marquardt minimizer can't handle with {function.Bind(initialParameters).GetType().Name} function class.");
             (_minimumParameters, _maximumParameters) = (minimumParameters, maximumParameters);
             sln = LevenbergMarquardt(objective, function, initialParameters);
         }
@@ -45,7 +53,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
         {
             Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return new Vector(sln.Concat(_mesh ?? new Vector()));
+        return new Vector(sln.Concat(_mesh));
     }
 
     private IVector LevenbergMarquardt(IFunctional objective, IParametricFunction function, IVector x0)
@@ -79,7 +87,7 @@ class MinimizerLevenbergMarquardt : IOptimizator
             if (Solver is null)
             {
                 Console.WriteLine("Cause Solver is null it set immediately as Gauss.");
-                Solver = new NewGauss();
+                Solver = new Gauss();
             }
             var h = Solver.Solve(JTJ, gradient);
 

@@ -1,3 +1,4 @@
+using System.Text;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
@@ -11,13 +12,21 @@ class SplineFunction : IParametricFunction
     /// P(x) = sum_{i = 1}^{2n} (q_i * psi_i(x))
     /// where q_i - coefficient, psi_i - basis function.
     /// </summary>
-    class InternalSplineFunction : IFunction, IMeshable
+    class InternalSplineFunction : IFunction, IMeshable, IWritableFunction
     {
         // Basis functions.
         private double phi1(double t) => 1.0 - 3.0*t*t + 2.0*t*t*t; 
         private double phi2(double t) => t - 2.0*t*t + t*t*t; 
         private double phi3(double t) => 3.0*t*t - 2.0*t*t*t; 
-        private double phi4(double t) => -1.0*t*t + t*t*t; 
+        private double phi4(double t) => -1.0*t*t + t*t*t;
+
+        string IWritableFunction.ToString()
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < (q?.Count ?? 0); ++i)
+                sb.AppendLine($"q_{i} = {q![i]}");
+            return sb.ToString();        
+        }
 
         public IVector? q;   // Coefficients.
         public IVector? x;   // Spline mesh.
