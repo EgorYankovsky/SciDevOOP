@@ -17,7 +17,7 @@ class MinimizerMCG : IOptimizator
 
     public int MaxIterations = 100_000;
     public double Tolerance = 1e-15;
-    public double DichotomyEps = 1e-7;
+    public double DichotomyEps = 1e-15;
     public double H = 1e-15; // For gradient.
 
     public ILimitingMethod? LimitingMethod;
@@ -25,7 +25,7 @@ class MinimizerMCG : IOptimizator
     IVector IOptimizator.Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
         IVector sln = new Vector();
-        _mesh = (function.Bind(initialParameters) is IMeshable) ? (function.Bind(initialParameters) as IMeshable)!.GetMesh() : default;
+        _mesh = (function.Bind(initialParameters) as IMeshable)?.GetMesh() ?? new Vector([]);
         try
         {
             if (minimumParameters is not null && initialParameters.Count != minimumParameters.Count)
@@ -46,13 +46,13 @@ class MinimizerMCG : IOptimizator
         {
             Console.WriteLine($"Unexpected exception:\n{ex}");
         }
-        return new Vector(sln.Concat(_mesh is not null ? _mesh : []));
+        return new Vector(sln.Concat(_mesh));
     }
 
     private IVector Method(IFunctional objective, IParametricFunction function, IVector initialParameters)
     {
         var k = 0;
-        var xCurr = new Vector(initialParameters.Take(initialParameters.Count - (_mesh is not null ? _mesh.Count : 0)));
+        var xCurr = new Vector(initialParameters.Take(initialParameters.Count - _mesh!.Count));
         var s = new Vector([.. xCurr.Select(p => 0)]);
 
         while (k < MaxIterations)
@@ -60,7 +60,7 @@ class MinimizerMCG : IOptimizator
             // step 1 - each n iterations zeros direction
             if (k % xCurr.Count == 0)
             {
-                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh ?? new Vector()))));
+                var grad = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh!))));
                 for (var i = 0; i < s.Count; i++)
                     s[i] = -grad[i];
             }
@@ -74,8 +74,8 @@ class MinimizerMCG : IOptimizator
                 xNext.Add(xCurr[i] + lambda * s[i]);
 
             // step 3, 4 - find new direction.
-            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xNext.Concat(_mesh ?? new Vector()))));
-            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh ?? new Vector()))));
+            var gradNext = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xNext.Concat(_mesh!))));
+            var gradCurr = (objective as IDifferentiableFunctional)!.Gradient(function.Bind(new Vector(xCurr.Concat(_mesh!))));
 
             var w = Math.Pow((gradNext as INormable)!.Norma(), 2) / Math.Pow((gradCurr as INormable)!.Norma(), 2);
 
@@ -87,8 +87,9 @@ class MinimizerMCG : IOptimizator
             var xDiff = new Vector();
             for (var i = 0; i < xCurr.Count; ++i) xDiff.Add(xNext[i] - xCurr[i]);
             var xDiffNorm = xDiff.Norma();
-            if (k < 100) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
-            else if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
+
+            Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector s norm: {sNorm:E15}");
+            //else if (k % 100 == 0) Console.WriteLine($"Current iteration: {k}. Current difference norm: {xDiffNorm:E15}. Current vector's norm: {sNorm:E15}");
             if (sNorm < Tolerance || xDiffNorm < Tolerance)
             {
                 var a = 0; var b = 0;
@@ -101,7 +102,10 @@ class MinimizerMCG : IOptimizator
 
                 if (a + b == 0)
                 {
+                    Console.WriteLine();
                     Console.WriteLine($"MCG answer found for {k} iterations.");
+                    Console.WriteLine($"sNorm: {sNorm}");
+                    Console.WriteLine($"xDiffNorm: {xDiffNorm}");
                     return xNext;
                 }
             }
@@ -168,7 +172,7 @@ class MinimizerMCG : IOptimizator
         var point = new Vector();
         for (var i = 0; i < x.Count; i++)
             point.Add(x[i] + lambda * s[i]);
-        var fun = function.Bind(new Vector(point.Concat(_mesh ?? new Vector())));
+        var fun = function.Bind(new Vector(point.Concat(_mesh!)));
         var value = objective.Value(fun);
         LimitingMethod ??= new BarrierMethod();
         LimitingMethod.Limit(ref value, point, _minimumParameters, _maximumParameters);

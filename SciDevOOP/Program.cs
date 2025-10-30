@@ -12,16 +12,16 @@ using SciDevOOP.ImmutableInterfaces.Functionals;
 
 /*
  * Reading support console and TXT input.
- *  - to use console input use as: Read()
- *  - to use txt input use as: Read("file_name.txt")
- *      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\file_name as input folder
- *      ! also you can set here a random EXISTING! folder.
+ *  - to use console input call as: Read()
+ *  - to use txt input call as: Read("file_name.txt")
+ *      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\ as input folder
+ *      ! also you can set here a full path of EXISTING! file.
  *  
  *  Writing support console and TXT output.
  *  - to use console output use as: Write(res)
  *  - to use txt input use as: Read(res, "file_name.txt")
- *      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\file_name as output folder
- *      ! also you can set here a random EXISTING! folder.
+ *      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\ as output folder
+ *      ! also you can set here a random folder.
  */
 
 partial class Program
@@ -29,11 +29,14 @@ partial class Program
     static void Main(string[] args)
     {
         IOptimizator optimizer = new MinimizerLevenbergMarquardt();
-        var fun = new LineFunctionN();
-        var points = Read("inputLineN.txt");
+        var fun = new PiecewiseLinearFunction();
+        var points = Read("inputPW.txt");
         var initial = new Vector
         {
-            -1.0, 0.1, 2.0
+            0.7,
+            0.4,
+            0.1, 0.1, 0.2,
+            -1.0, 0.0, 1.0
         };
         //var minimal = new Vector
         //{
@@ -52,8 +55,5 @@ partial class Program
         };
         var res = optimizer.Minimize(functional, fun, initial/*, minimal, maximal*/);
         Write(res);
-        
-        
-        //TestLineN(optimizer, fun);
     }
 }
