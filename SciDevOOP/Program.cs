@@ -33,29 +33,27 @@ partial class Program
         for (int i = 0;  i < 10; i++)
         {
             IOptimizator optimizer = new MinimizerSimulatedAnnealing(new ContinuousImprovement(), new BasketFiring());
-            var fun = new SplineFunction();
-            var points = Read("inputSpline.txt");
+            var fun = new PiecewiseLinearFunction();
+            var points = Read("inputPW.txt");
 
             // Начальное приближение для коэффициентов c0, c1, c2
             var initial = new Vector {
-                0.5, 0.0, 1.47, -0.78, 1.88,
--0.35,
-0.0, 2.0, 5.0
-            };
+            0.8, 0.7, 0.9, -0.78, -1.87, -1.0, 0.0, 1.0
+        };
             // Границы ДЛЯ КОЭФФИЦИЕНТОВ (не для пространства интегрирования!)
-            var paramLowerBound = new Vector { 0.5, 0.0, 0.47, -0.78, 0.88,
--0.35,
-0.0, 0.0, 0.0 };
-            var paramUpperBound = new Vector { 1.5, 1.0, 1.47, 1.78, 1.88,
-1.35,
-1.0, 2.0, 5.0 };
+            var paramLowerBound = new Vector { -0.8, -0.7, -0.9, -0.78, -0.87, -1.0, 0.0, 1.0 };
+            var paramUpperBound = new Vector { 1.8, 1.7, 1.9, 1.78, 1.87, -1.0, 0.0, 1.0 };
 
             // Границы для пространства интегрирования (отдельно!)
             var integrationLowerBound = new Vector { 0.0, 0.0 };  // min x1, min x2
-            var integrationUpperBound = new Vector { 1.0, 1.0 };  // max x1, max x2
+            var integrationUpperBound = new Vector { 1.5, 1.5 };  // max x1, max x2
 
-            var functional = new SimpleIntegrationNorm{                points = points
+            var functional = new IntegrationNorm(integrationLowerBound, integrationUpperBound, gaussOrder: 6)
+            {
+                points = points
             };
+
+            functional.SetHighPrecisionForDiscontinuousFunctions();
 
             // Передаем границы для параметров, а не для интегрирования
             var res = optimizer.Minimize(functional, fun, initial, paramLowerBound, paramUpperBound);

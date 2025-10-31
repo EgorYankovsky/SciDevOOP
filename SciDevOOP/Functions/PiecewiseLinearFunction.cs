@@ -54,7 +54,7 @@ class PiecewiseLinearFunction : IParametricFunction
     }
 
     /// <summary>
-    /// Method, that binds parameters to function. Must be successfully tested!
+    /// Method, that binds parameters to function.
     /// </summary>
     /// <param name="parameters">parameters = [a, b, c0, c1, ... cn, x0, x1, ... xn]</param>
     /// <returns>Generated InternalPiecewiseLinearFunction class.</returns>
