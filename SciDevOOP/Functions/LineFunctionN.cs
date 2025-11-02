@@ -31,7 +31,6 @@ class LineFunctionN : IParametricFunction
             for (var i = 0; i < coefficients!.Count; ++i)
             {
                 var coefficientsCopy = new Vector(coefficients);
-                // If parameter is too little, we shall find derivative with other way.
                 coefficientsCopy[i] += _h;
                 var f1 = new LineFunctionN().Bind(coefficientsCopy);
                 var derivative = (f1.Value(point) - baseValue) / _h;

@@ -15,10 +15,10 @@ class SplineFunction : IParametricFunction
     class InternalSplineFunction : IFunction, IMeshable, IWritableFunction
     {
         // Basis functions.
-        private double phi1(double t) => 1.0 - 3.0*t*t + 2.0*t*t*t; 
-        private double phi2(double t) => t - 2.0*t*t + t*t*t; 
-        private double phi3(double t) => 3.0*t*t - 2.0*t*t*t; 
-        private double phi4(double t) => -1.0*t*t + t*t*t;
+        private static double Phi1(double t) => 1.0D - 3.0D*t*t + 2.0D*t*t*t; 
+        private static double Phi2(double t) => t - 2.0D*t*t + t*t*t; 
+        private static double Phi3(double t) => 3.0D*t*t - 2.0D*t*t*t; 
+        private static double Phi4(double t) => -1.0D*t*t + t*t*t;
 
         string IWritableFunction.ToString()
         {
@@ -48,12 +48,9 @@ class SplineFunction : IParametricFunction
                     indexLeft = middleIndex;
                     break;
                 }
-                else if (point[0] < x[middleIndex])
-                    indexRight = middleIndex;
-                else if (point[0] > x[middleIndex])
-                    indexLeft = middleIndex;
+                else if (point[0] < x[middleIndex]) indexRight = middleIndex;
+                else if (point[0] > x[middleIndex]) indexLeft = middleIndex;
             }
-            //Console.WriteLine($"{indexLeft} {indexRight}");
             return indexLeft;
         }
 
@@ -64,12 +61,18 @@ class SplineFunction : IParametricFunction
             if (x![^1] - point[0] <= 1e-15)
             {
                 var hLast = x![^1] - x![^2];
-                return q![^4] * phi1(1.0D) + hLast * q![^3] * phi2(1.0D) + q![^2] * phi3(1.0D) + hLast * q![^1] * phi4(1.0D);
+                return q![^4] * Phi1(1.0D) +
+                       hLast * q![^3] * Phi2(1.0D) +
+                       q![^2] * Phi3(1.0D) +
+                       hLast * q![^1] * Phi4(1.0D);
             }
             var index = FindSplineIndex(point);
             var h = x![index + 1] - x![index];
             var eps = (point[0] - x![index]) / h;
-            return q![2 * index] * phi1(eps) + h * q[2 * index + 1] * phi2(eps) + q![2 * (index + 1)] * phi3(eps) + h * q![2 * (index + 1) + 1] * phi4(eps);
+            return q![2 * index] * Phi1(eps) +
+                   h * q[2 * index + 1] * Phi2(eps) +
+                   q![2 * (index + 1)] * Phi3(eps) +
+                   h * q![2 * (index + 1) + 1] * Phi4(eps);
         }
 
         IVector IMeshable.GetMesh() => x is not null ? x : new Vector();

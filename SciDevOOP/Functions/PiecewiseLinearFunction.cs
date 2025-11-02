@@ -2,7 +2,6 @@ using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.MathematicalObjects;
 using System.Text;
-using System.Xml;
 
 namespace SciDevOOP.Functions;
 
@@ -47,7 +46,6 @@ class PiecewiseLinearFunction : IParametricFunction
                 var derivative = (f1.Value(point) - baseValue) / _h;
                 gradient.Add(derivative);
             }
-            //gradient.AddRange(xes!.Select(x => 0.0));
             return gradient;
         }
 
