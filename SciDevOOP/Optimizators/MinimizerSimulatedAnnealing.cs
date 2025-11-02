@@ -5,21 +5,25 @@ using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.MathematicalObjects;
 using SciDevOOP.Optimizators.SimulatedAnnealingTools;
 using SciDevOOP.Functions;
+using SciDevOOP.Optimizators.SimulatedAnnealingTools.TemperatureChangeLaws;
+using SciDevOOP.Optimizators.SimulatedAnnealingTools.TransitionRules;
 
 namespace SciDevOOP.Optimizators;
 
-class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureChangeLaw temperatureChangeLaw) : IOptimizator
+class MinimizerSimulatedAnnealing : IOptimizator
 {
-    public readonly uint MaxIterations = 100_000;
-    public readonly double MinTemperature = 0.0001;
+    public uint MaxIterations = 100_000;
+    public double MinTemperature = 0.0001;
     public double InitialTemperature = 1000.0D;
-
-    private readonly ITemperatureChangeLaw _temperatureChangeLaw = temperatureChangeLaw;
-    private readonly ITransitionRule _transitionRule = transitionRule;
+    public ITemperatureChangeLaw? TemperatureChangeLaw;
+    public ITransitionRule? TransitionRule;
 
 
     public IVector Minimize(IFunctional objective, IParametricFunction function, IVector initialParameters, IVector? minimumParameters = null, IVector? maximumParameters = null)
     {
+        TemperatureChangeLaw ??= new BasketFiring();
+        TransitionRule ??= new ContinuousImprovement();
+
         minimumParameters ??= new Vector([.. initialParameters.Select(v => 0)]);
         maximumParameters ??= new Vector([.. initialParameters.Select(v => 1)]);
         var parameters = new Vector([.. initialParameters.Select(v => v)]);
@@ -51,7 +55,7 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
                     }
 
                     var newFunctionalValue = objective.Value(function.Bind(parameters));
-                    var probability = _transitionRule.Value(ti, newFunctionalValue, minFunctionalValue);
+                    var probability = TransitionRule?.Value(ti, newFunctionalValue, minFunctionalValue);
 
                     if (rnd.NextDouble() < probability)
                     {
@@ -61,7 +65,7 @@ class MinimizerSimulatedAnnealing(ITransitionRule transitionRule, ITemperatureCh
                     ++i;
                 }
                 outerIter++;
-                ti = _temperatureChangeLaw.Value(ti, outerIter);
+                ti = TemperatureChangeLaw.Value(ti, outerIter);
             }
             Console.WriteLine($"Total iterations: {outerIter * MaxIterations}");
         }

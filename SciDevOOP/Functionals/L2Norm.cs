@@ -27,7 +27,6 @@ class L2Norm : IDifferentiableFunctional, ILeastSquaresFunctional
             if (gradient.Count == 0)
                 for (var i = 0; i < gradF.Count; ++i) gradient.Add(0);
             var diff = function.Value(param) - fi;
-            //gradient.Add(diff / l2Value);
             for (var i = 0; i < gradient.Count; ++i) gradient[i] += diff * gradF[i] / l2Value;
 
         }
