@@ -9,19 +9,76 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.Functionals;
+using SciDevOOP.Optimizators.GradientableAlgorithmTools.LimitingMethods;
+using SciDevOOP.Mesh;
 
 partial class Program
 {
     static void Main(string[] args)
     {
+        List<IVector> unqs =
+        [
+            new Vector {0, 2, 5},
+            new Vector {0, 3, 6},
+            new Vector {0, 2, 4},
+        ];
+        IMeshBuilder mshBldr = new MeshBuilderND();
+        IMesh mesh = mshBldr.Build(unqs);
+        var a = mesh.GetElementsIndexes([0, 0, 0]);
+        var b = mesh.GetElementsIndexes([0, 1, 0]);
+        var c = mesh.GetElementsIndexes([1, 0, 0]);
+        var d = mesh.GetElementsIndexes([1, 1, 0]);
+        var a1 = mesh.GetElementsIndexes([0, 0, 1]);
+        var b1 = mesh.GetElementsIndexes([0, 1, 1]);
+        var c1 = mesh.GetElementsIndexes([1, 0, 1]);
+        var d1 = mesh.GetElementsIndexes([1, 1, 1]);
+
+        return;
+        var spline = new NewSplineFunction();
+        var initialParameters = new Vector
+        {
+            2,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            0.0, 0.0,
+            2.0, 0.0,
+            4.0, 0.0,
+            0.0, 2.0,
+            2.0, 2.0,
+            4.0, 2.0,
+            0.0, 4.0,
+            2.0, 4.0,
+            4.0, 4.0,
+        };
+        var binded = spline.Bind(initialParameters);
+        double x0 = 0.0; double y0 = 0.0;
+        double xn = 4.0; double yn = 4.0;
+        double ht = 0.25;
+        double xi = x0; double yi = y0;
+        for (int i = 0; yi <= yn; ++i, yi = y0 + ht * i)
+        {
+            for (int j = 0; xi <= xn; ++j, xi = x0 + ht * j)
+            {
+                Console.WriteLine($"f({xi}, {yi}) = {binded.Value(new Vector { xi, yi })}");
+            }
+        }
+
+        return;
         // 1. Choose IOptimizator: MinimizerLevenbergMarquardt, MinimizerMCG, MinimizerSimulatedAnnealing.
-        IOptimizator optimizer = new MinimizerLevenbergMarquardt();
+        IOptimizator optimizer = new MinimizerSimulatedAnnealing();
 
 
         // 2. Choose IParametricFunction: LineFunctionN, PiecewiseLinearFunction, Polynomial, SplineFunction.
         var fun = new PiecewiseLinearFunction();
-        
-        
+
+
         // 3. Read points.
         /*
          * Reading support console and TXT input.
