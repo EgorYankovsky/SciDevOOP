@@ -28,60 +28,65 @@ partial class Program
 {
     static void Main(string[] args)
     {
-        IList<double> answer = new List<double>();
-        var allResults = new List<IVector>();
-        for (int i = 0;  i < 10; i++)
-        {
-            IOptimizator optimizer = new MinimizerSimulatedAnnealing(new ContinuousImprovement(), new BasketFiring());
-            var fun = new PiecewiseLinearFunction();
-            var points = Read("inputPW.txt");
+        // 1. Choose IOptimizator: MinimizerLevenbergMarquardt, MinimizerMCG, MinimizerSimulatedAnnealing.
+        IOptimizator optimizer = new MinimizerMonteCarlo();
 
-            // Начальное приближение для коэффициентов c0, c1, c2
-            var initial = new Vector {
-            0.8, 0.7, 0.9, -0.78, -1.87, -1.0, 0.0, 1.0
+
+        // 2. Choose IParametricFunction: LineFunctionN, PiecewiseLinearFunction, Polynomial, SplineFunction.
+        var fun = new PiecewiseLinearFunction();
+
+
+        // 3. Read points.
+        /*
+         * Reading support console and TXT input.
+         *  - to use console input call as: Read()
+         *  - to use txt input call as: Read("file_name.txt")
+         *      ! basicly, it reads files from \\SciDevOOP\\bin\\Resources\\ folder
+         *      ! also you can set here a full path of EXISTING! file.
+        */
+        var points = Read("inputPW.txt");
+
+
+        // 4. Initialize vector of parameters.
+        var initial = new Vector
+        {
+            0.7,
+            0.4,
+            0.1, 0.1, 0.2,
+            -1.0, 0.0, 1.0
         };
-            // Границы ДЛЯ КОЭФФИЦИЕНТОВ (не для пространства интегрирования!)
-            var paramLowerBound = new Vector { -0.8, -0.7, -0.9, -0.78, -0.87, -1.0, 0.0, 1.0 };
-            var paramUpperBound = new Vector { 1.8, 1.7, 1.9, 1.78, 1.87, -1.0, 0.0, 1.0 };
 
-            // Границы для пространства интегрирования (отдельно!)
-            var integrationLowerBound = new Vector { 0.0, 0.0 };  // min x1, min x2
-            var integrationUpperBound = new Vector { 1.5, 1.5 };  // max x1, max x2
-
-            var functional = new IntegrationNorm(integrationLowerBound, integrationUpperBound, gaussOrder: 6)
-            {
-                points = points
-            };
-
-            functional.SetHighPrecisionForDiscontinuousFunctions();
-
-            // Передаем границы для параметров, а не для интегрирования
-            var res = optimizer.Minimize(functional, fun, initial, paramLowerBound, paramUpperBound);
-            allResults.Add(res);
-            Write(res);
-        }
-        answer = CalculateAverage(allResults);
-
-        Console.WriteLine($"Средний результат: [{string.Join(", ", answer)}]");
-        Write(answer);
-    }
-    private static IList<double> CalculateAverage(List<IVector> vectors)
-    {
-        if (vectors.Count == 0) return new List<double>();
-
-        var average = new List<double>();
-        int dimension = vectors[0].Count;
-
-        for (int i = 0; i < dimension; i++)
+        // 4a. If necessary - initialize vector of minimal or maximal parameters.
+        var minimal = new Vector
         {
-            double sum = 0;
-            foreach (var vector in vectors)
-            {
-                sum += vector[i];
-            }
-            average.Add(sum / vectors.Count);
-        }
+            0.0, -2.0, 0.0, -1.0, -1.0, -4.0,
+            0.0, 2.0, 5.0
+        };
+        var maximal = new Vector
+        {
+            4.0, 2.0, 4.47, 1.78, 2.88, 0.35,
+            0.0, 2.0, 5.0
+        };
 
-        return average;
+        // 5. Choose IFunctional: IntegrationNorm, L1Norm, L2Norm, LInfNorm.
+        var functional = new L2Norm()
+        {
+            points = points
+        };
+
+
+        // 6. Solve minimization problem.
+        var slnParams = optimizer.Minimize(functional, fun, initial/*, minimal, maximal*/);
+
+
+        // 7. Write solution.
+        /*
+         *  Writing support console and TXT output.
+         *  - to use console output use as: Write(res)
+         *  - to use txt output use as: Read(res, "file_name.txt")
+         *      ! basicly, it uses \\SciDevOOP\\bin\\Resources\\ as output folder
+         *      ! also you can set here a random folder.
+        */
+        Write((fun.Bind(slnParams) as IWritableFunction)!);
     }
 }

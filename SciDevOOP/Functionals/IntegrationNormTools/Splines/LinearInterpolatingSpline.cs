@@ -11,13 +11,13 @@ class LinearInterpolatingSpline : IParametricSpline
 
         public IVector? mesh;
 
-        private Mesh? _mesh;
+        //private Mesh? _mesh;
 
         public double Value(IVector point)
         {
             if (point.Count != (mesh.Count % q.Count)) throw new ArgumentException("Point and mesh dimenstions aren't equal.");
             
-            _mesh = new Mesh(mesh);
+            //_mesh = new Mesh(mesh);
             
             throw new NotImplementedException();
         }
