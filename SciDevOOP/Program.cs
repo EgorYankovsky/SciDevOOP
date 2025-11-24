@@ -9,19 +9,35 @@ using SciDevOOP.ImmutableInterfaces.MathematicalObjects;
 using SciDevOOP.ImmutableInterfaces;
 using SciDevOOP.ImmutableInterfaces.Functions;
 using SciDevOOP.ImmutableInterfaces.Functionals;
+using SciDevOOP.Optimizators.GradientableAlgorithmTools.LimitingMethods;
+using SciDevOOP.Mesh;
 
 partial class Program
 {
     static void Main(string[] args)
     {
+        var pnts = Read("inputTPS.txt");
+        IVector prms = new Vector
+        {
+            pnts.Count
+        };
+        foreach (var pnt in pnts)
+            foreach (var xi in pnt)
+                prms.Add(xi);
+
+        var spln = new ThinPlateSpline();
+        var S = spln.Bind(prms);
+
+
+        return;
         // 1. Choose IOptimizator: MinimizerLevenbergMarquardt, MinimizerMCG, MinimizerSimulatedAnnealing.
-        IOptimizator optimizer = new MinimizerLevenbergMarquardt();
+        IOptimizator optimizer = new MinimizerSimulatedAnnealing();
 
 
         // 2. Choose IParametricFunction: LineFunctionN, PiecewiseLinearFunction, Polynomial, SplineFunction.
         var fun = new PiecewiseLinearFunction();
-        
-        
+
+
         // 3. Read points.
         /*
          * Reading support console and TXT input.
